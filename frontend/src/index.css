@@ -1,0 +1,293 @@
+/* ============================================================
+   MEDICARE HOSPITAL MANAGEMENT SYSTEM — MASTER DESIGN SYSTEM
+   Vibe: Clean, calm, clinical & trustworthy hospital look
+   Typography: Poppins (600/700) headings + Inter (400/500) body
+   Color Palette: Calibrated Sky-Blue tokens & Frosted Glass
+   ============================================================ */
+
+:root {
+  /* ── Master Sky Tokens ── */
+  --sky-50:  #F0F9FF; /* Page background tint */
+  --sky-100: #E0F2FE; /* Section backgrounds, hover fills */
+  --sky-200: #BAE6FD; /* Borders, dividers, chips */
+  --sky-300: #7DD3FC; /* Light accents, progress bars */
+  --sky-400: #38BDF8; /* Vibrant sky */
+  --sky-500: #0EA5E9; /* Primary buttons, active states */
+  --sky-600: #0284C7; /* Primary hover */
+  --sky-700: #0369A1; /* Primary pressed, links */
+  --sky-800: #075985;
+  --sky-900: #0C4A6E;
+
+  /* ── Base Neutrals & Feedback ── */
+  --white:    #FFFFFF;
+  --text-900: #0F172A; /* Headings */
+  --text-700: #334155; /* Body text */
+  --text-500: #64748B; /* Hints & captions */
+  --text-400: #94A3B8;
+
+  --success:  #16A34A; /* Completed, available, normal */
+  --warning:  #F59E0B; /* Pending, low stock */
+  --danger:   #DC2626; /* Emergency, critical, delete */
+
+  /* ── Role Themes & Accents ── */
+  --role-doctor:       #0EA5E9; /* Stethoscope - Sky */
+  --role-lab:          #06B6D4; /* Microscope - Cyan */
+  --role-pharmacy:     #10B981; /* Pill - Mint Green */
+  --role-admin:        #0369A1; /* Shield - Deep Sky */
+  --role-receptionist: #38BDF8; /* Clipboard - Soft Sky */
+  --role-nurse:        #0EA5E9; /* Heart pulse - Sky */
+  --role-patient:      #0EA5E9;
+
+  /* ── Backward-compatible tokens mapped to Sky system ── */
+  --clr-primary-50:  var(--sky-50);
+  --clr-primary-100: var(--sky-100);
+  --clr-primary-200: var(--sky-200);
+  --clr-primary-300: var(--sky-300);
+  --clr-primary-400: var(--sky-400);
+  --clr-primary-500: var(--sky-500);
+  --clr-primary-600: var(--sky-600);
+  --clr-primary-700: var(--sky-700);
+
+  --clr-neutral-50:  #F8FAFC;
+  --clr-neutral-100: #F1F5F9;
+  --clr-neutral-200: var(--sky-200);
+  --clr-neutral-300: #CBD5E1;
+  --clr-neutral-400: var(--text-400);
+  --clr-neutral-500: var(--text-500);
+  --clr-neutral-600: var(--text-700);
+  --clr-neutral-700: var(--text-700);
+  --clr-neutral-800: #1E293B;
+  --clr-neutral-900: var(--text-900);
+
+  --clr-success: var(--success);
+  --clr-warning: var(--warning);
+  --clr-danger:  var(--danger);
+  --clr-info:    var(--sky-500);
+
+  /* ── Frosted Glass Surfaces ── */
+  --surface-page:    var(--sky-50);
+  --surface-card:    rgba(255, 255, 255, 0.84);
+  --surface-card-subtle: rgba(255, 255, 255, 0.72);
+  --glass-border:    1px solid rgba(255, 255, 255, 0.65);
+  --glass-blur:      blur(12px);
+
+  /* ── Sidebar & Topbar Surfaces ── */
+  --sidebar-bg:       rgba(255, 255, 255, 0.94);
+  --sidebar-border:   rgba(186, 230, 253, 0.45);
+  --sidebar-text:     var(--text-700);
+  --sidebar-text-act: var(--sky-700);
+  --sidebar-active:   var(--sky-100);
+  --sidebar-hover:    var(--sky-50);
+
+  --topbar-bg:        rgba(255, 255, 255, 0.88);
+  --topbar-border:    rgba(186, 230, 253, 0.5);
+
+  /* ── Radii ── */
+  --radius-xs:   6px;
+  --radius-sm:   10px;
+  --radius-md:   12px;
+  --radius-lg:   16px;
+  --radius-xl:   20px;
+  --radius-full: 9999px;
+
+  /* ── Shadows ── */
+  --shadow-xs: 0 1px 2px rgba(2, 132, 199, 0.04);
+  --shadow-sm: 0 2px 8px rgba(2, 132, 199, 0.06);
+  --shadow-md: 0 4px 16px rgba(2, 132, 199, 0.08);
+  --shadow-lg: 0 12px 28px rgba(2, 132, 199, 0.15);
+  --shadow-primary: 0 8px 20px rgba(14, 165, 233, 0.35);
+
+  /* ── Transitions & Easings ── */
+  --ease:          cubic-bezier(0.22, 1, 0.36, 1);
+  --ease-standard: cubic-bezier(0.4, 0, 0.2, 1);
+  --t-fast:        0.15s;
+  --t-med:         0.25s;
+  --t-slow:        0.45s;
+}
+
+/* ── Reset & Baseline ── */
+*, *::before, *::after {
+  box-sizing: border-box;
+  margin: 0;
+  padding: 0;
+}
+
+html {
+  scroll-behavior: smooth;
+  font-size: 16px;
+  color-scheme: light;
+}
+
+body {
+  font-family: 'Inter', -apple-system, BlinkMacSystemFont, 'Segoe UI', Roboto, sans-serif;
+  font-size: 15px;
+  color: var(--text-700);
+  background-color: var(--sky-50);
+  line-height: 1.55;
+  min-height: 100vh;
+  -webkit-font-smoothing: antialiased;
+  -moz-osx-font-smoothing: grayscale;
+}
+
+/* ── Typography Scale ── */
+h1, h2, h3, h4, h5, h6 {
+  font-family: 'Poppins', 'Outfit', sans-serif;
+  font-weight: 700;
+  color: var(--text-900);
+  line-height: 1.25;
+  letter-spacing: -0.015em;
+}
+
+h1 { font-size: 32px; font-weight: 700; }
+h2 { font-size: 24px; font-weight: 600; }
+h3 { font-size: 18px; font-weight: 600; }
+h4 { font-size: 16px; font-weight: 600; }
+
+.body-text    { font-size: 15px; color: var(--text-700); }
+.caption-text { font-size: 13px; color: var(--text-500); }
+
+/* Tabular numbers for vital signs & stats */
+.tabular-nums, .stat-value, .vital-val, .table-num {
+  font-feature-settings: 'tnum';
+  font-variant-numeric: tabular-nums;
+}
+
+a {
+  color: var(--sky-700);
+  text-decoration: none;
+  transition: color var(--t-fast) ease;
+}
+a:hover {
+  color: var(--sky-600);
+}
+
+button {
+  cursor: pointer;
+  font-family: inherit;
+}
+
+input, select, textarea {
+  font-family: inherit;
+}
+
+/* ── Scrollbars ── */
+::-webkit-scrollbar { width: 6px; height: 6px; }
+::-webkit-scrollbar-track { background: transparent; }
+::-webkit-scrollbar-thumb { background: var(--sky-200); border-radius: 9999px; }
+::-webkit-scrollbar-thumb:hover { background: var(--sky-300); }
+
+/* ── Animations ── */
+@keyframes cardFadeUp {
+  from {
+    opacity: 0;
+    transform: translateY(20px);
+  }
+  to {
+    opacity: 1;
+    transform: translateY(0);
+  }
+}
+
+@keyframes roleBgCrossfade {
+  from {
+    opacity: 0.6;
+    transform: scale(1.05);
+  }
+  to {
+    opacity: 1;
+    transform: scale(1);
+  }
+}
+
+@keyframes emergencyPulseRing {
+  0% {
+    box-shadow: 0 0 0 0 rgba(220, 38, 38, 0.55);
+  }
+  70% {
+    box-shadow: 0 0 0 14px rgba(220, 38, 38, 0);
+  }
+  100% {
+    box-shadow: 0 0 0 0 rgba(220, 38, 38, 0);
+  }
+}
+
+@keyframes ecgHeartbeatDraw {
+  0% {
+    stroke-dashoffset: 160;
+  }
+  50% {
+    stroke-dashoffset: 0;
+  }
+  100% {
+    stroke-dashoffset: -160;
+  }
+}
+
+@keyframes skeletonSweep {
+  0% {
+    background-position: -200% 0;
+  }
+  100% {
+    background-position: 200% 0;
+  }
+}
+
+@keyframes bellShake {
+  0%, 100% { transform: rotate(0deg); }
+  20% { transform: rotate(14deg); }
+  40% { transform: rotate(-12deg); }
+  60% { transform: rotate(8deg); }
+  80% { transform: rotate(-6deg); }
+}
+
+@keyframes rippleEffect {
+  0% {
+    transform: scale(0);
+    opacity: 0.45;
+  }
+  100% {
+    transform: scale(3.5);
+    opacity: 0;
+  }
+}
+
+@keyframes spin {
+  to { transform: rotate(360deg); }
+}
+
+@keyframes floatGentle {
+  0%, 100% { transform: translateY(0px); }
+  50%      { transform: translateY(-8px); }
+}
+
+/* Shorthand animation utility classes */
+.animate-fade-up {
+  animation: cardFadeUp 450ms var(--ease) both;
+}
+
+.stagger-1 { animation-delay: 60ms; }
+.stagger-2 { animation-delay: 120ms; }
+.stagger-3 { animation-delay: 180ms; }
+.stagger-4 { animation-delay: 240ms; }
+.stagger-5 { animation-delay: 300ms; }
+
+.animate-pulse-ring {
+  animation: emergencyPulseRing 2s infinite ease-out;
+}
+
+.skeleton-shimmer {
+  background: linear-gradient(90deg, var(--sky-100) 0%, rgba(255,255,255,0.85) 50%, var(--sky-100) 100%);
+  background-size: 200% 100%;
+  animation: skeletonSweep 1.4s infinite linear;
+  border-radius: var(--radius-sm);
+}
+
+/* Reduced motion preference */
+@media (prefers-reduced-motion: reduce) {
+  *, *::before, *::after {
+    animation-duration: 0.01ms !important;
+    animation-iteration-count: 1 !important;
+    transition-duration: 0.01ms !important;
+    scroll-behavior: auto !important;
+  }
+}

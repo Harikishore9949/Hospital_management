@@ -1,0 +1,439 @@
+/* ═══════════════════════════════════════════════════════════════════════════
+   PRINTABLE DIAGNOSTIC LAB REPORT MODAL & HARDCOPY STYLES
+   Accredited Standard: NABL ISO 15189:2022 Clinical Pathology Specification
+   ═══════════════════════════════════════════════════════════════════════════ */
+
+.print-modal-overlay {
+  position: fixed;
+  inset: 0;
+  z-index: 999999;
+  background: rgba(15, 23, 42, 0.80);
+  backdrop-filter: blur(8px);
+  display: flex;
+  align-items: center;
+  justify-content: center;
+  padding: 20px;
+  overflow-y: auto;
+}
+
+.print-modal-container {
+  background: #ffffff;
+  border-radius: 20px;
+  width: 100%;
+  max-width: 880px;
+  box-shadow: 0 30px 80px rgba(0, 0, 0, 0.45);
+  overflow: hidden;
+  border: 1px solid #cbd5e1;
+  margin: auto;
+  animation: modalScaleUp 0.25s ease-out;
+}
+
+@keyframes modalScaleUp {
+  from { opacity: 0; transform: scale(0.96) translateY(10px); }
+  to { opacity: 1; transform: scale(1) translateY(0); }
+}
+
+.print-modal-topbar {
+  background: #0f172a;
+  color: #ffffff;
+  padding: 16px 24px;
+  display: flex;
+  justify-content: space-between;
+  align-items: center;
+}
+
+.print-topbar-left {
+  display: flex;
+  align-items: center;
+  gap: 12px;
+}
+
+.print-icon-box {
+  width: 38px;
+  height: 38px;
+  background: #0284c7;
+  border-radius: 10px;
+  display: flex;
+  align-items: center;
+  justify-content: center;
+  font-size: 1.2rem;
+}
+
+.print-topbar-title {
+  font-family: 'Outfit', sans-serif;
+  font-size: 1rem;
+  font-weight: 800;
+  color: #ffffff;
+  margin: 0;
+}
+
+.print-topbar-sub {
+  font-size: 0.72rem;
+  color: #94a3b8;
+  margin: 0;
+}
+
+.print-topbar-actions {
+  display: flex;
+  align-items: center;
+  gap: 10px;
+}
+
+.btn-report-print {
+  background: #0284c7;
+  color: #ffffff;
+  border: none;
+  padding: 8px 16px;
+  border-radius: 10px;
+  font-size: 0.80rem;
+  font-weight: 700;
+  display: inline-flex;
+  align-items: center;
+  gap: 6px;
+  cursor: pointer;
+  transition: all 0.15s ease;
+  box-shadow: 0 2px 8px rgba(2, 132, 199, 0.35);
+}
+
+.btn-report-print:hover {
+  background: #0369a1;
+  transform: translateY(-1px);
+}
+
+.btn-report-close {
+  background: transparent;
+  border: none;
+  color: #94a3b8;
+  font-size: 1.4rem;
+  cursor: pointer;
+  padding: 4px 8px;
+  border-radius: 6px;
+  transition: color 0.15s ease;
+}
+
+.btn-report-close:hover {
+  color: #ffffff;
+}
+
+/* ── Printable Document Sheet ──────────────────────────────────────────── */
+.lab-report-sheet {
+  padding: 36px 40px;
+  background: #ffffff;
+  color: #0f172a;
+  font-family: 'Inter', -apple-system, sans-serif;
+  line-height: 1.5;
+}
+
+/* Header */
+.report-doc-header {
+  border-bottom: 2.5px solid #0284c7;
+  padding-bottom: 20px;
+  margin-bottom: 20px;
+  display: flex;
+  justify-content: space-between;
+  align-items: flex-start;
+  gap: 20px;
+}
+
+.report-hospital-brand {
+  display: flex;
+  align-items: center;
+  gap: 14px;
+}
+
+.report-hospital-logo {
+  width: 48px;
+  height: 48px;
+  background: #0284c7;
+  color: #ffffff;
+  border-radius: 12px;
+  display: flex;
+  align-items: center;
+  justify-content: center;
+  font-size: 1.8rem;
+  font-weight: 900;
+}
+
+.report-hospital-name {
+  font-family: 'Outfit', sans-serif;
+  font-size: 1.35rem;
+  font-weight: 900;
+  color: #091e3a;
+  text-transform: uppercase;
+  letter-spacing: -0.01em;
+  margin: 0;
+}
+
+.report-hospital-dept {
+  font-size: 0.76rem;
+  font-weight: 800;
+  color: #0284c7;
+  text-transform: uppercase;
+  letter-spacing: 0.05em;
+  margin: 2px 0 0 0;
+}
+
+.report-accreditation-line {
+  font-size: 0.72rem;
+  color: #64748b;
+  margin-top: 4px;
+}
+
+.report-stamp-block {
+  text-align: right;
+}
+
+.report-verified-badge {
+  display: inline-block;
+  background: #dcfce7;
+  border: 1.5px solid #86efac;
+  color: #15803d;
+  font-size: 0.72rem;
+  font-weight: 800;
+  padding: 4px 12px;
+  border-radius: 9999px;
+  letter-spacing: 0.04em;
+}
+
+.report-barcode-text {
+  font-family: monospace;
+  font-size: 0.76rem;
+  font-weight: 700;
+  color: #334155;
+  margin-top: 6px;
+}
+
+.report-ref-lab {
+  font-size: 0.70rem;
+  color: #64748b;
+}
+
+/* Patient Demographics Grid */
+.report-demographics-grid {
+  display: grid;
+  grid-template-columns: repeat(4, 1fr);
+  gap: 12px 16px;
+  background: #f8fafc;
+  border: 1px solid #e2e8f0;
+  border-radius: 12px;
+  padding: 16px 20px;
+  margin-bottom: 22px;
+  font-size: 0.76rem;
+}
+
+@media (max-width: 650px) {
+  .report-demographics-grid {
+    grid-template-columns: repeat(2, 1fr);
+  }
+}
+
+.report-demog-label {
+  display: block;
+  font-size: 0.68rem;
+  color: #64748b;
+  font-weight: 600;
+  text-transform: uppercase;
+  letter-spacing: 0.03em;
+  margin-bottom: 2px;
+}
+
+.report-demog-val {
+  font-size: 0.82rem;
+  font-weight: 700;
+  color: #0f172a;
+}
+.report-demog-val.highlight {
+  color: #0284c7;
+}
+.report-demog-val.paid {
+  color: #059669;
+}
+
+/* Equipment / Methodology Strip */
+.report-equipment-strip {
+  background: #f0fdf4;
+  border: 1px solid #bbf7d0;
+  border-radius: 10px;
+  padding: 10px 16px;
+  margin-bottom: 20px;
+  font-size: 0.75rem;
+  color: #166534;
+  display: flex;
+  align-items: center;
+  justify-content: space-between;
+  flex-wrap: wrap;
+  gap: 8px;
+}
+
+/* Biomarker Results Table */
+.report-results-table {
+  width: 100%;
+  border-collapse: collapse;
+  font-size: 0.80rem;
+  margin-bottom: 24px;
+  border: 1px solid #cbd5e1;
+  border-radius: 10px;
+  overflow: hidden;
+}
+
+.report-results-table th {
+  background: #0f172a;
+  color: #ffffff;
+  padding: 10px 14px;
+  font-size: 0.72rem;
+  font-weight: 700;
+  text-transform: uppercase;
+  letter-spacing: 0.05em;
+  text-align: left;
+}
+
+.report-results-table td {
+  padding: 11px 14px;
+  border-bottom: 1px solid #e2e8f0;
+  color: #334155;
+}
+
+.report-results-table tbody tr:nth-child(even) {
+  background: #f8fafc;
+}
+
+.report-results-table tbody tr.abnormal {
+  background: #fffbeb;
+}
+
+.report-status-tag {
+  display: inline-block;
+  font-size: 0.68rem;
+  font-weight: 800;
+  padding: 2px 8px;
+  border-radius: 9999px;
+  text-align: center;
+}
+.report-status-tag.normal {
+  background: #dcfce7;
+  color: #166534;
+}
+.report-status-tag.elevated {
+  background: #fef3c7;
+  color: #b45309;
+}
+.report-status-tag.critical {
+  background: #fee2e2;
+  color: #b91c1c;
+}
+
+/* Pathologist Remarks */
+.report-remarks-card {
+  background: #f8fafc;
+  border: 1px solid #e2e8f0;
+  border-radius: 12px;
+  padding: 14px 18px;
+  margin-bottom: 24px;
+  font-size: 0.78rem;
+}
+
+.report-remarks-title {
+  font-weight: 800;
+  color: #0f172a;
+  margin: 0 0 6px 0;
+  font-size: 0.80rem;
+  display: flex;
+  align-items: center;
+  gap: 6px;
+}
+
+.report-remarks-text {
+  color: #475569;
+  margin: 0;
+  line-height: 1.5;
+}
+
+/* Signatures & Footer */
+.report-signatures-row {
+  display: flex;
+  justify-content: space-between;
+  align-items: flex-end;
+  border-top: 1px solid #cbd5e1;
+  padding-top: 18px;
+  margin-top: 20px;
+}
+
+.sig-title {
+  font-size: 0.78rem;
+  font-weight: 800;
+  color: #0f172a;
+  margin: 4px 0 0 0;
+}
+.sig-sub {
+  font-size: 0.68rem;
+  color: #64748b;
+  margin: 0;
+}
+.sig-line {
+  font-family: 'Brush Script MT', cursive, serif;
+  font-size: 1.15rem;
+  color: #0369a1;
+  border-bottom: 1px dashed #94a3b8;
+  padding-bottom: 2px;
+  display: inline-block;
+  min-width: 130px;
+}
+
+.report-qr-box {
+  text-align: center;
+  border: 1px solid #e2e8f0;
+  border-radius: 8px;
+  padding: 8px 12px;
+  background: #f8fafc;
+}
+
+.report-qr-text {
+  font-family: monospace;
+  font-size: 0.70rem;
+  color: #475569;
+  font-weight: 700;
+}
+
+.report-footer-disclaimer {
+  border-top: 1px solid #f1f5f9;
+  margin-top: 18px;
+  padding-top: 10px;
+  display: flex;
+  justify-content: space-between;
+  font-size: 0.68rem;
+  color: #94a3b8;
+}
+
+/* ── Print Specific Media Query ────────────────────────────────────────── */
+@media print {
+  body * {
+    visibility: hidden;
+  }
+  .print-modal-overlay {
+    position: static !important;
+    background: none !important;
+    padding: 0 !important;
+    backdrop-filter: none !important;
+  }
+  .print-modal-container {
+    box-shadow: none !important;
+    border: none !important;
+    max-width: 100% !important;
+    width: 100% !important;
+    margin: 0 !important;
+  }
+  .print-modal-topbar {
+    display: none !important;
+  }
+  .lab-report-sheet,
+  .lab-report-sheet * {
+    visibility: visible;
+  }
+  .lab-report-sheet {
+    position: absolute;
+    left: 0;
+    top: 0;
+    width: 100%;
+    padding: 20px !important;
+  }
+}

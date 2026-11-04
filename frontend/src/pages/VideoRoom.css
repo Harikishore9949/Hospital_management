@@ -1,0 +1,709 @@
+/* ── Google Meet Design System & Video Consultation Room Styling ──────── */
+@import url('https://fonts.googleapis.com/css2?family=Google+Sans:wght@400;500;700&family=Roboto:wght@400;500;700&display=swap');
+
+* { box-sizing: border-box; }
+
+.vroom-root.meet-theme {
+  position: fixed;
+  inset: 0;
+  background: #202124; /* Google Meet background color */
+  display: flex;
+  flex-direction: column;
+  overflow: hidden;
+  font-family: 'Google Sans', 'Roboto', sans-serif;
+  color: #e8eaed;
+  z-index: 9999;
+}
+
+/* ── Google Meet Topbar ────────────────────────────────────────────────── */
+.meet-topbar {
+  height: 60px;
+  background: #202124;
+  display: flex;
+  align-items: center;
+  justify-content: space-between;
+  padding: 0 24px;
+  flex-shrink: 0;
+  z-index: 10;
+}
+
+.meet-topbar-left {
+  display: flex;
+  align-items: center;
+  gap: 16px;
+}
+
+.meet-brand-logo {
+  display: flex;
+  align-items: center;
+  gap: 10px;
+}
+
+.meet-dot-green {
+  width: 9px;
+  height: 9px;
+  border-radius: 50%;
+  background: #34a853;
+  box-shadow: 0 0 8px rgba(52, 168, 83, 0.8);
+}
+
+.meet-title {
+  font-size: 0.95rem;
+  font-weight: 500;
+  color: #e8eaed;
+  letter-spacing: 0.01em;
+}
+
+.meet-presenting-chip {
+  background: rgba(138, 180, 248, 0.15);
+  border: 1px solid rgba(138, 180, 248, 0.3);
+  color: #8ab4f8;
+  padding: 4px 12px;
+  border-radius: 16px;
+  font-size: 0.76rem;
+  font-weight: 500;
+  display: flex;
+  align-items: center;
+  gap: 6px;
+}
+
+.meet-topbar-right {
+  display: flex;
+  align-items: center;
+  gap: 12px;
+}
+
+.meet-time-clock {
+  font-size: 0.9rem;
+  font-weight: 500;
+  color: #bdc1c6;
+  margin-right: 8px;
+}
+
+.meet-header-icon-btn {
+  width: 40px;
+  height: 40px;
+  border-radius: 50%;
+  border: none;
+  background: transparent;
+  color: #e8eaed;
+  display: flex;
+  align-items: center;
+  justify-content: center;
+  cursor: pointer;
+  position: relative;
+  transition: background 0.18s;
+}
+
+.meet-header-icon-btn:hover {
+  background: rgba(255, 255, 255, 0.08);
+}
+
+.meet-header-icon-btn.active {
+  background: rgba(138, 180, 248, 0.2);
+  color: #8ab4f8;
+}
+
+.meet-badge {
+  position: absolute;
+  top: 4px;
+  right: 4px;
+  background: #1a73e8;
+  color: #fff;
+  font-size: 0.65rem;
+  font-weight: 700;
+  padding: 2px 5px;
+  border-radius: 10px;
+  min-width: 16px;
+  text-align: center;
+}
+
+/* ── Google Meet Body & Stage ─────────────────────────────────────────── */
+.meet-body {
+  flex: 1;
+  display: flex;
+  position: relative;
+  overflow: hidden;
+}
+
+.meet-stage {
+  flex: 1;
+  display: flex;
+  flex-direction: column;
+  position: relative;
+  padding: 12px 16px 80px;
+  transition: all 0.25s ease;
+}
+
+.meet-stage.with-panel {
+  margin-right: 360px;
+}
+
+/* ── Google Meet Grid ─────────────────────────────────────────────────── */
+.meet-grid {
+  flex: 1;
+  display: flex;
+  align-items: center;
+  justify-content: center;
+  gap: 16px;
+  width: 100%;
+  max-width: 1200px;
+  margin: 0 auto;
+}
+
+.meet-grid.one-peer .meet-tile {
+  width: min(840px, 92vw);
+  height: min(520px, 68vh);
+}
+
+.meet-grid.two-peers .meet-tile {
+  flex: 1;
+  max-width: 580px;
+  height: min(440px, 62vh);
+}
+
+/* Video Tile */
+.meet-tile {
+  position: relative;
+  background: #3c4043; /* Google Meet dark tile gray */
+  border-radius: 12px;
+  overflow: hidden;
+  box-shadow: 0 4px 16px rgba(0, 0, 0, 0.3);
+  display: flex;
+  align-items: center;
+  justify-content: center;
+}
+
+.meet-tile video {
+  width: 100%;
+  height: 100%;
+  object-fit: cover;
+  border-radius: 12px;
+}
+
+/* Avatar placeholder when camera is OFF */
+.meet-avatar-placeholder {
+  display: flex;
+  flex-direction: column;
+  align-items: center;
+  justify-content: center;
+  gap: 12px;
+}
+
+.meet-avatar-placeholder .avatar-circle {
+  width: 90px;
+  height: 90px;
+  border-radius: 50%;
+  background: linear-gradient(135deg, #5f6368, #3c4043);
+  display: flex;
+  align-items: center;
+  justify-content: center;
+  font-size: 2.5rem;
+  border: 2px solid rgba(255, 255, 255, 0.15);
+}
+
+.meet-avatar-placeholder .avatar-name {
+  font-size: 0.95rem;
+  font-weight: 500;
+  color: #e8eaed;
+}
+
+/* Tile name pill */
+.meet-tile-name {
+  position: absolute;
+  bottom: 12px;
+  left: 12px;
+  background: rgba(32, 33, 36, 0.75);
+  backdrop-filter: blur(4px);
+  padding: 5px 12px;
+  border-radius: 6px;
+  font-size: 0.82rem;
+  font-weight: 500;
+  color: #ffffff;
+  display: flex;
+  align-items: center;
+  gap: 6px;
+  z-index: 5;
+}
+
+.mic-off-icon {
+  color: #ea4335;
+}
+
+/* ── Google Meet Floating Control Capsule Bar ─────────────────────────── */
+.meet-controls-wrapper {
+  position: absolute;
+  bottom: 16px;
+  left: 50%;
+  transform: translateX(-50%);
+  z-index: 50;
+}
+
+.meet-controls-bar {
+  display: flex;
+  align-items: center;
+  gap: 12px;
+  background: #282e33; /* Google Meet capsule bar color */
+  border-radius: 40px;
+  padding: 10px 20px;
+  box-shadow: 0 8px 30px rgba(0, 0, 0, 0.45);
+  border: 1px solid rgba(255, 255, 255, 0.06);
+}
+
+/* Circular Action Buttons */
+.meet-ctrl-btn {
+  width: 48px;
+  height: 48px;
+  border-radius: 50%;
+  border: none;
+  background: #3c4043;
+  color: #e8eaed;
+  display: flex;
+  align-items: center;
+  justify-content: center;
+  cursor: pointer;
+  transition: all 0.18s ease;
+  position: relative;
+}
+
+.meet-ctrl-btn:hover {
+  background: #4a4e51;
+  transform: scale(1.05);
+}
+
+/* Muted / Off state (Red) */
+.meet-ctrl-btn.off {
+  background: #ea4335;
+  color: #ffffff;
+}
+
+.meet-ctrl-btn.off:hover {
+  background: #d93025;
+}
+
+/* Active Highlight States */
+.meet-ctrl-btn.active-blue {
+  background: #8ab4f8;
+  color: #202124;
+}
+
+.meet-ctrl-btn.active-yellow {
+  background: #fbbc04;
+  color: #202124;
+}
+
+.meet-ctrl-btn.active-gray {
+  background: #5f6368;
+}
+
+/* Red Oval Hangup Button */
+.meet-hangup-btn {
+  width: 60px;
+  height: 48px;
+  border-radius: 24px;
+  border: none;
+  background: #ea4335;
+  color: #ffffff;
+  display: flex;
+  align-items: center;
+  justify-content: center;
+  cursor: pointer;
+  transition: all 0.18s ease;
+  box-shadow: 0 4px 14px rgba(234, 67, 53, 0.4);
+}
+
+.meet-hangup-btn:hover {
+  background: #d93025;
+  transform: scale(1.06);
+  box-shadow: 0 6px 20px rgba(234, 67, 53, 0.6);
+}
+
+/* More popover menu */
+.meet-more-menu {
+  position: absolute;
+  bottom: calc(100% + 12px);
+  left: 50%;
+  transform: translateX(-50%);
+  background: #303134;
+  border: 1px solid rgba(255, 255, 255, 0.1);
+  border-radius: 12px;
+  padding: 8px;
+  min-width: 200px;
+  box-shadow: 0 10px 30px rgba(0, 0, 0, 0.5);
+  z-index: 100;
+  display: flex;
+  flex-direction: column;
+  gap: 4px;
+}
+
+.meet-menu-item {
+  display: flex;
+  align-items: center;
+  gap: 12px;
+  padding: 10px 14px;
+  border-radius: 8px;
+  background: transparent;
+  border: none;
+  color: #e8eaed;
+  font-size: 0.85rem;
+  font-weight: 500;
+  cursor: pointer;
+  text-align: left;
+  width: 100%;
+  transition: background 0.15s;
+}
+
+.meet-menu-item:hover {
+  background: rgba(255, 255, 255, 0.08);
+}
+
+/* ── Google Meet Slide-in Right Side Panel ───────────────────────────── */
+.vroom-side-panel {
+  position: absolute;
+  right: 0;
+  top: 0;
+  bottom: 0;
+  width: 360px;
+  background: #303134; /* Google Meet side panel color */
+  border-left: 1px solid rgba(255, 255, 255, 0.08);
+  display: flex;
+  flex-direction: column;
+  z-index: 40;
+  animation: panelSlideIn 0.25s ease both;
+}
+
+@keyframes panelSlideIn {
+  from { transform: translateX(100%); }
+  to   { transform: translateX(0); }
+}
+
+.vroom-panel-header {
+  height: 60px;
+  display: flex;
+  align-items: center;
+  justify-content: space-between;
+  padding: 0 16px;
+  border-bottom: 1px solid rgba(255, 255, 255, 0.08);
+}
+
+.vroom-panel-tabs {
+  display: flex;
+  gap: 8px;
+}
+
+.vroom-tab-btn {
+  background: transparent;
+  border: none;
+  color: #bdc1c6;
+  font-size: 0.85rem;
+  font-weight: 500;
+  padding: 8px 12px;
+  border-radius: 8px;
+  cursor: pointer;
+  display: flex;
+  align-items: center;
+  gap: 6px;
+  transition: all 0.15s;
+}
+
+.vroom-tab-btn:hover {
+  background: rgba(255, 255, 255, 0.06);
+  color: #e8eaed;
+}
+
+.vroom-tab-btn.active {
+  background: rgba(138, 180, 248, 0.15);
+  color: #8ab4f8;
+  font-weight: 700;
+}
+
+.vroom-panel-close {
+  background: transparent;
+  border: none;
+  color: #bdc1c6;
+  cursor: pointer;
+  padding: 6px;
+  border-radius: 50%;
+  display: flex;
+  align-items: center;
+  justify-content: center;
+  transition: background 0.15s;
+}
+
+.vroom-panel-close:hover {
+  background: rgba(255, 255, 255, 0.08);
+  color: #ffffff;
+}
+
+/* Panel Body */
+.vroom-docs-body,
+.vroom-people-body {
+  flex: 1;
+  overflow-y: auto;
+  padding: 16px;
+}
+
+/* Alert Box */
+.vroom-alert-box {
+  padding: 10px 14px;
+  border-radius: 8px;
+  margin-bottom: 14px;
+  font-size: 0.8rem;
+  font-weight: 500;
+}
+
+.vroom-alert-box.success {
+  background: rgba(52, 168, 83, 0.18);
+  color: #81c995;
+  border: 1px solid rgba(52, 168, 83, 0.3);
+}
+
+.vroom-alert-box.error {
+  background: rgba(234, 67, 53, 0.18);
+  color: #f28b82;
+  border: 1px solid rgba(234, 67, 53, 0.3);
+}
+
+/* Upload Area */
+.vroom-upload-area {
+  border: 2px dashed rgba(138, 180, 248, 0.35);
+  border-radius: 12px;
+  padding: 20px 16px;
+  text-align: center;
+  cursor: pointer;
+  background: rgba(138, 180, 248, 0.04);
+  transition: all 0.2s ease;
+  margin-bottom: 16px;
+  display: block;
+}
+
+.vroom-upload-area:hover,
+.vroom-upload-area.drag-over {
+  border-color: #8ab4f8;
+  background: rgba(138, 180, 248, 0.1);
+}
+
+.vroom-upload-area input[type="file"] { display: none; }
+.vroom-upload-icon { font-size: 2rem; margin-bottom: 8px; }
+.vroom-upload-text { font-size: 0.8rem; color: #bdc1c6; line-height: 1.5; }
+.vroom-upload-text strong { color: #8ab4f8; }
+
+.vroom-upload-btn {
+  margin-top: 10px;
+  padding: 8px 18px;
+  background: #1a73e8;
+  color: #ffffff;
+  border: none;
+  border-radius: 20px;
+  font-size: 0.8rem;
+  font-weight: 500;
+  cursor: pointer;
+  display: inline-flex;
+  align-items: center;
+  gap: 6px;
+  transition: background 0.15s;
+}
+
+.vroom-upload-btn:hover { background: #1669c1; }
+
+.vroom-doctor-note {
+  background: rgba(251, 188, 4, 0.12);
+  border: 1px solid rgba(251, 188, 4, 0.3);
+  color: #fdd663;
+  padding: 10px 14px;
+  border-radius: 8px;
+  font-size: 0.78rem;
+  line-height: 1.5;
+  margin-bottom: 14px;
+  display: flex;
+  gap: 8px;
+}
+
+/* Document Item */
+.vroom-docs-list { display: flex; flex-direction: column; gap: 8px; }
+.vroom-doc-item {
+  background: rgba(255, 255, 255, 0.04);
+  border: 1px solid rgba(255, 255, 255, 0.08);
+  border-radius: 10px;
+  padding: 10px 12px;
+  display: flex;
+  align-items: center;
+  gap: 10px;
+}
+
+.vroom-doc-icon { font-size: 1.5rem; flex-shrink: 0; }
+.vroom-doc-info { flex: 1; min-width: 0; }
+.vroom-doc-name {
+  font-size: 0.82rem;
+  font-weight: 500;
+  color: #e8eaed;
+  white-space: nowrap;
+  overflow: hidden;
+  text-overflow: ellipsis;
+}
+
+.vroom-doc-meta { font-size: 0.7rem; color: #9aa0a6; margin-top: 2px; }
+
+.vroom-doc-actions { display: flex; gap: 4px; }
+.vroom-doc-btn {
+  background: transparent;
+  border: none;
+  padding: 6px;
+  border-radius: 6px;
+  cursor: pointer;
+  transition: background 0.15s;
+}
+
+.vroom-doc-view { color: #8ab4f8; }
+.vroom-doc-view:hover { background: rgba(138, 180, 248, 0.15); }
+.vroom-doc-delete { color: #f28b82; }
+.vroom-doc-delete:hover { background: rgba(234, 67, 53, 0.15); }
+
+.vroom-docs-empty {
+  text-align: center;
+  padding: 40px 16px;
+  color: #9aa0a6;
+  font-size: 0.85rem;
+}
+
+.vroom-docs-empty .empty-icon { font-size: 2.2rem; margin-bottom: 8px; }
+
+/* People List */
+.vroom-people-section-title {
+  font-size: 0.75rem;
+  font-weight: 700;
+  text-transform: uppercase;
+  letter-spacing: 0.06em;
+  color: #9aa0a6;
+  margin-bottom: 12px;
+}
+
+.vroom-person-item {
+  display: flex;
+  align-items: center;
+  gap: 12px;
+  padding: 10px 12px;
+  background: rgba(255, 255, 255, 0.04);
+  border-radius: 10px;
+  margin-bottom: 8px;
+}
+
+.vroom-person-avatar {
+  width: 36px;
+  height: 36px;
+  border-radius: 50%;
+  background: rgba(255, 255, 255, 0.1);
+  display: flex;
+  align-items: center;
+  justify-content: center;
+  font-size: 1.2rem;
+}
+
+.vroom-person-info { flex: 1; }
+.vroom-person-name { font-size: 0.85rem; font-weight: 500; color: #e8eaed; }
+.vroom-person-role { font-size: 0.72rem; color: #9aa0a6; margin-top: 1px; }
+
+.vroom-you-badge {
+  background: rgba(138, 180, 248, 0.2);
+  color: #8ab4f8;
+  font-size: 0.7rem;
+  font-weight: 700;
+  padding: 2px 8px;
+  border-radius: 10px;
+}
+
+/* ── Notification Toasts Stack ────────────────────────────────────────── */
+.vroom-notif-stack {
+  position: fixed;
+  top: 70px;
+  right: 20px;
+  display: flex;
+  flex-direction: column;
+  gap: 10px;
+  z-index: 9999;
+  pointer-events: none;
+}
+
+.vroom-notif {
+  background: #3c4043;
+  border: 1px solid rgba(255, 255, 255, 0.1);
+  border-radius: 12px;
+  padding: 12px 16px;
+  display: flex;
+  align-items: center;
+  gap: 12px;
+  box-shadow: 0 8px 24px rgba(0, 0, 0, 0.5);
+  animation: notifSlide 0.3s ease both;
+  min-width: 280px;
+  max-width: 360px;
+  pointer-events: all;
+}
+
+.vroom-notif.exit { animation: notifExit 0.3s ease both; }
+
+@keyframes notifSlide {
+  from { transform: translateX(120%); opacity: 0; }
+  to   { transform: translateX(0); opacity: 1; }
+}
+
+@keyframes notifExit {
+  from { transform: translateX(0); opacity: 1; }
+  to   { transform: translateX(120%); opacity: 0; }
+}
+
+.vroom-notif-icon { font-size: 1.5rem; }
+.vroom-notif-body { flex: 1; }
+.vroom-notif-title { font-size: 0.85rem; font-weight: 700; color: #e8eaed; }
+.vroom-notif-msg { font-size: 0.76rem; color: #bdc1c6; margin-top: 2px; }
+.vroom-notif-close { background: none; border: none; color: #9aa0a6; cursor: pointer; }
+.vroom-notif-close:hover { color: #fff; }
+
+/* ── Session Ended Screen ─────────────────────────────────────────────── */
+.vroom-ended {
+  position: fixed;
+  inset: 0;
+  background: #202124;
+  display: flex;
+  flex-direction: column;
+  align-items: center;
+  justify-content: center;
+  gap: 16px;
+  z-index: 9999;
+}
+
+.vroom-ended-icon { font-size: 4rem; }
+.vroom-ended h2 { font-size: 1.6rem; font-weight: 600; color: #e8eaed; }
+.vroom-ended p { font-size: 0.9rem; color: #bdc1c6; text-align: center; max-width: 400px; }
+
+.meet-btn-primary {
+  padding: 12px 32px;
+  background: #1a73e8;
+  color: #ffffff;
+  border: none;
+  border-radius: 24px;
+  font-size: 0.9rem;
+  font-weight: 500;
+  cursor: pointer;
+  transition: all 0.18s ease;
+  margin-top: 8px;
+}
+
+.meet-btn-primary:hover {
+  background: #1669c1;
+  transform: translateY(-1px);
+  box-shadow: 0 4px 12px rgba(26, 115, 232, 0.4);
+}
+
+/* Responsive */
+@media (max-width: 768px) {
+  .meet-grid.two-peers {
+    flex-direction: column;
+  }
+  .meet-stage.with-panel {
+    margin-right: 0;
+  }
+  .vroom-side-panel {
+    width: 100%;
+    top: 60px;
+  }
+}

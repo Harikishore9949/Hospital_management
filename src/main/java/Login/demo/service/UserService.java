@@ -26,26 +26,61 @@ public class UserService {
 
     // REGISTER
     public User register(User user) {
-
-        user.setPassword(
-                passwordEncoder.encode(user.getPassword())
-        );
-
+        if (user.getUsername() == null || user.getUsername().trim().isEmpty()) {
+            throw new RuntimeException("Username is required.");
+        }
+        String cleanedUsername = user.getUsername().trim();
+        if (userRepository.findByUsername(cleanedUsername).isPresent()) {
+            throw new RuntimeException("Username '" + cleanedUsername + "' already exists. Please choose a different username.");
+        }
+        user.setUsername(cleanedUsername);
+        user.setPassword(passwordEncoder.encode(user.getPassword()));
         return userRepository.save(user);
     }
 
     // LOGIN
     public User login(String username, String password) {
-
         authenticationManager.authenticate(
                 new UsernamePasswordAuthenticationToken(
-                        username,
+                        username != null ? username.trim() : "",
                         password
                 )
         );
 
-        return userRepository.findByUsername(username)
+        return userRepository.findByUsername(username != null ? username.trim() : "")
                 .orElseThrow(() ->
                         new UsernameNotFoundException("User not found"));
+    }
+
+    // CHANGE PASSWORD
+    public void changePassword(String username, String currentPassword, String newPassword) {
+        User user = userRepository.findByUsername(username)
+                .orElseThrow(() -> new RuntimeException("User not found"));
+
+        if (!passwordEncoder.matches(currentPassword, user.getPassword())) {
+            throw new RuntimeException("Incorrect current password.");
+        }
+
+        if (newPassword == null || newPassword.trim().length() < 6) {
+            throw new RuntimeException("New password must be at least 6 characters long.");
+        }
+
+        user.setPassword(passwordEncoder.encode(newPassword.trim()));
+        userRepository.save(user);
+    }
+
+    // UPDATE USERNAME
+    public User updateUsername(String currentUsername, String newUsername) {
+        if (newUsername == null || newUsername.trim().length() < 3) {
+            throw new RuntimeException("New username must be at least 3 characters long.");
+        }
+        String trimmed = newUsername.trim();
+        if (userRepository.findByUsername(trimmed).isPresent() && !trimmed.equalsIgnoreCase(currentUsername)) {
+            throw new RuntimeException("Username '" + trimmed + "' is already taken.");
+        }
+        User user = userRepository.findByUsername(currentUsername)
+                .orElseThrow(() -> new RuntimeException("User not found"));
+        user.setUsername(trimmed);
+        return userRepository.save(user);
     }
 }

@@ -1,0 +1,393 @@
+/* ============================================================
+   MEDICARE AUTH PAGE — MASTER SKY CLINICAL THEME
+   Vibe: Clean, calm, clinical, trustworthy hospital aesthetic
+   Palette: Sky-50 to Sky-700, Frosted Glass, WCAG AA Contrast
+   Typography: Poppins Headings, Inter Body
+   ============================================================ */
+
+/* ── Full-page wrapper ──────────────────────────────────── */
+.auth-page {
+  min-height: 100vh;
+  display: flex;
+  align-items: center;
+  justify-content: center;
+  position: relative;
+  overflow: hidden;
+  background: linear-gradient(135deg, #F0F9FF 0%, #E0F2FE 50%, #F8FAFC 100%);
+  padding: 40px 24px;
+}
+
+/* Ambient clinical glow blobs (pure color, no photos or signs) */
+.auth-page::before {
+  content: '';
+  position: absolute;
+  width: 480px;
+  height: 480px;
+  border-radius: 50%;
+  background: radial-gradient(circle, rgba(14, 165, 233, 0.10) 0%, rgba(240, 249, 255, 0) 70%);
+  bottom: 5%;
+  left: 10%;
+  pointer-events: none;
+  animation: floatGentle 10s ease-in-out infinite reverse;
+}
+
+/* Ambient glow blobs */
+.auth-page::after {
+  content: '';
+  position: absolute;
+  width: 500px;
+  height: 500px;
+  border-radius: 50%;
+  background: radial-gradient(circle, rgba(14, 165, 233, 0.15) 0%, rgba(240, 249, 255, 0) 70%);
+  top: 10%;
+  right: 15%;
+  pointer-events: none;
+  animation: floatGentle 8s ease-in-out infinite;
+}
+
+/* ── Main card wrapper ──────────────────────────────────── */
+.auth-card-wrapper {
+  position: relative;
+  z-index: 10;
+  width: 100%;
+  max-width: 460px;
+  animation: cardFadeUp 450ms var(--ease) both;
+}
+
+/* Top accent line (Sky gradient) */
+.auth-card-wrapper::before {
+  content: '';
+  display: block;
+  height: 4px;
+  border-radius: 99px 99px 0 0;
+  background: linear-gradient(90deg, var(--sky-400), var(--sky-500), var(--sky-600));
+}
+
+.auth-card {
+  background: rgba(255, 255, 255, 0.92);
+  backdrop-filter: blur(14px);
+  -webkit-backdrop-filter: blur(14px);
+  border-radius: 0 0 20px 20px;
+  padding: 38px 36px 36px;
+  box-shadow:
+    0 20px 50px rgba(2, 132, 199, 0.12),
+    0 4px 16px rgba(2, 132, 199, 0.06);
+  border: 1px solid rgba(255, 255, 255, 0.85);
+  border-top: none;
+}
+
+/* ── Logo & ECG Heartbeat ───────────────────────────────── */
+.auth-logo-center {
+  display: flex;
+  flex-direction: column;
+  align-items: center;
+  margin-bottom: 24px;
+}
+
+.auth-logo-ring {
+  width: 60px;
+  height: 60px;
+  border-radius: 16px;
+  display: flex;
+  align-items: center;
+  justify-content: center;
+  margin-bottom: 14px;
+  background: var(--sky-500);
+  box-shadow: 0 8px 20px rgba(14, 165, 233, 0.35);
+  color: #fff;
+}
+
+.auth-card-title {
+  font-family: 'Poppins', sans-serif;
+  font-size: 1.55rem;
+  font-weight: 700;
+  color: var(--text-900);
+  text-align: center;
+  margin-bottom: 4px;
+  letter-spacing: -0.015em;
+}
+
+.auth-card-sub {
+  font-size: 0.875rem;
+  color: var(--text-500);
+  text-align: center;
+  margin-bottom: 24px;
+}
+
+/* ── Auth Tabs (Sign In / Register) ─────────────────────── */
+.auth-tabs {
+  display: flex;
+  background: var(--sky-50);
+  border-radius: 12px;
+  padding: 4px;
+  margin-bottom: 24px;
+  border: 1.5px solid var(--sky-200);
+}
+
+.auth-tab {
+  flex: 1;
+  padding: 10px;
+  border: none;
+  background: transparent;
+  border-radius: 10px;
+  font-size: 0.9rem;
+  font-weight: 600;
+  color: var(--text-500);
+  cursor: pointer;
+  transition: all var(--t-fast) var(--ease);
+  font-family: 'Inter', sans-serif;
+}
+
+.auth-tab.active {
+  background: #FFFFFF;
+  color: var(--sky-700);
+  box-shadow: 0 2px 8px rgba(14, 165, 233, 0.12);
+}
+
+/* ── Form Inputs ────────────────────────────────────────── */
+.auth-card .form-group {
+  margin-bottom: 18px;
+}
+
+.auth-card .form-label {
+  display: block;
+  font-size: 0.83rem;
+  font-weight: 600;
+  color: var(--text-900);
+  margin-bottom: 6px;
+}
+
+.auth-card .form-input {
+  width: 100%;
+  height: 44px;
+  padding: 0 14px;
+  border: 1.5px solid var(--sky-200);
+  border-radius: 10px;
+  font-size: 0.92rem;
+  color: var(--text-900);
+  background: rgba(255, 255, 255, 0.95);
+  outline: none;
+  transition: border-color var(--t-fast), box-shadow var(--t-fast);
+  font-family: 'Inter', sans-serif;
+}
+
+.auth-card .form-input:focus {
+  border-color: var(--sky-500);
+  background: #FFFFFF;
+  box-shadow: 0 0 0 3px rgba(14, 165, 233, 0.22);
+}
+
+.auth-card .input-wrap {
+  position: relative;
+}
+
+.auth-card .input-wrap .input-icon {
+  position: absolute;
+  left: 14px;
+  top: 50%;
+  transform: translateY(-50%);
+  color: var(--text-400);
+  display: flex;
+  align-items: center;
+  pointer-events: none;
+  transition: color var(--t-fast);
+}
+
+.auth-card .input-wrap:focus-within .input-icon {
+  color: var(--sky-600);
+}
+
+.auth-card .input-wrap .form-input {
+  padding-left: 42px;
+}
+
+.auth-card .input-wrap .input-eye {
+  position: absolute;
+  right: 14px;
+  top: 50%;
+  transform: translateY(-50%);
+  background: none;
+  border: none;
+  color: var(--text-400);
+  cursor: pointer;
+  display: flex;
+  align-items: center;
+  padding: 2px;
+  transition: color var(--t-fast);
+}
+
+.auth-card .input-wrap .input-eye:hover {
+  color: var(--sky-600);
+}
+
+/* ── Primary Auth Button (Sky-500) ───────────────────────── */
+.btn-auth-primary {
+  display: flex;
+  align-items: center;
+  justify-content: center;
+  gap: 8px;
+  width: 100%;
+  height: 44px;
+  padding: 0 22px;
+  background: var(--sky-500);
+  color: #fff;
+  border: none;
+  border-radius: 12px;
+  font-size: 0.95rem;
+  font-weight: 600;
+  font-family: 'Inter', sans-serif;
+  cursor: pointer;
+  transition: all var(--t-fast) var(--ease);
+  box-shadow: 0 4px 14px rgba(14, 165, 233, 0.28);
+  margin-top: 10px;
+}
+
+.btn-auth-primary:hover:not(:disabled) {
+  background: var(--sky-600);
+  box-shadow: 0 8px 20px rgba(14, 165, 233, 0.35);
+  transform: translateY(-2px);
+}
+
+.btn-auth-primary:active:not(:disabled) {
+  background: var(--sky-700);
+  transform: scale(0.97);
+}
+
+.btn-auth-primary:disabled {
+  opacity: 0.5;
+  cursor: not-allowed;
+}
+
+/* ── Role Selector (Sign Up) ────────────────────────────── */
+.role-selector {
+  display: grid;
+  grid-template-columns: repeat(3, 1fr);
+  gap: 10px;
+  margin-bottom: 20px;
+}
+
+.role-opt {
+  position: relative;
+}
+
+.role-opt input {
+  position: absolute;
+  opacity: 0;
+  width: 0;
+  height: 0;
+}
+
+.role-lbl {
+  display: flex;
+  flex-direction: column;
+  align-items: center;
+  gap: 6px;
+  padding: 12px 6px;
+  border: 1.5px solid var(--sky-200);
+  border-radius: 12px;
+  cursor: pointer;
+  transition: all var(--t-fast) var(--ease);
+  background: var(--sky-50);
+  color: var(--text-900);
+}
+
+.role-lbl:hover {
+  border-color: var(--sky-400);
+  background: var(--sky-100);
+  transform: translateY(-1px);
+}
+
+.role-opt input:checked + .role-lbl {
+  border-color: var(--sky-500);
+  background: var(--sky-100);
+  box-shadow: 0 0 0 3px rgba(14, 165, 233, 0.18);
+}
+
+.role-emoji {
+  font-size: 1.5rem;
+}
+
+.role-name {
+  font-size: 0.74rem;
+  font-weight: 600;
+  color: var(--text-700);
+}
+
+.role-opt input:checked + .role-lbl .role-name {
+  color: var(--sky-700);
+}
+
+/* ── Meta & Remember Row ────────────────────────────────── */
+.auth-meta-row {
+  display: flex;
+  align-items: center;
+  justify-content: space-between;
+  margin: 8px 0 14px;
+  font-size: 0.84rem;
+}
+
+.auth-remember {
+  display: flex;
+  align-items: center;
+  gap: 7px;
+  color: var(--text-700);
+  cursor: pointer;
+}
+
+.auth-remember input[type="checkbox"] {
+  width: 16px;
+  height: 16px;
+  accent-color: var(--sky-500);
+  cursor: pointer;
+}
+
+.auth-forgot {
+  background: none;
+  border: none;
+  color: var(--sky-700);
+  font-size: 0.83rem;
+  font-weight: 600;
+  cursor: pointer;
+  font-family: 'Inter', sans-serif;
+  transition: color var(--t-fast);
+}
+
+.auth-forgot:hover {
+  color: var(--sky-600);
+  text-decoration: underline;
+}
+
+/* ── Toggle link ─────────────────────────────────────────── */
+.auth-toggle {
+  text-align: center;
+  margin-top: 22px;
+  font-size: 0.875rem;
+  color: var(--text-500);
+}
+
+.auth-toggle button {
+  color: var(--sky-600);
+  font-weight: 700;
+  background: none;
+  border: none;
+  cursor: pointer;
+  font-size: inherit;
+  font-family: inherit;
+  margin-left: 4px;
+  transition: color var(--t-fast);
+}
+
+.auth-toggle button:hover {
+  color: var(--sky-700);
+  text-decoration: underline;
+}
+
+/* ── Responsive ──────────────────────────────────────────── */
+@media (max-width: 480px) {
+  .auth-card {
+    padding: 30px 20px 28px;
+  }
+  .role-selector {
+    grid-template-columns: 1fr 1fr;
+  }
+}

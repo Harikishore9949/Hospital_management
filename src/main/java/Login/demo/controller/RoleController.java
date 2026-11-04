@@ -17,9 +17,4 @@ public class RoleController {
     public String patientAccess() {
         return "Welcome Patient! You have patient access.";
     }
-
-    @GetMapping("/pharmacy/test")
-    public String pharmacyAccess() {
-        return "Welcome Pharmacy! You have pharmacy access.";
-    }
 }

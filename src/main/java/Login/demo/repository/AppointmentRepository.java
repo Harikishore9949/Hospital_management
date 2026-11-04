@@ -15,17 +15,29 @@ public interface AppointmentRepository
             AppointmentStatus status
     );
 
-    List<Appointment> findByDoctorAndStatusOrderByQueuePositionAsc(
-            User doctor,
-            AppointmentStatus status
-    );
+    List<Appointment> findByDoctorOrderByRequestedAtDesc(User doctor);
+
+    /** Used by admin cascade-delete */
+    List<Appointment> findByDoctor(User doctor);
 
     boolean existsByAvailabilitySlotId(
             Integer availabilitySlotId
+    );
+
+    boolean existsByAvailabilitySlotIdAndStatusIn(
+            Integer availabilitySlotId,
+            java.util.Collection<AppointmentStatus> statuses
     );
 
     long countByDoctorAndStatus(
             User doctor,
             AppointmentStatus status
     );
+
+    List<Appointment> findByStatusAndPaymentStatus(
+            AppointmentStatus status,
+            String paymentStatus
+    );
+
+    List<Appointment> findByPatientOrderByRequestedAtDesc(User patient);
 }
