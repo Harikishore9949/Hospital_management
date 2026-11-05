@@ -23,9 +23,9 @@ export default defineConfig({
       },
     },
   },
-  // When building for production, output goes to Spring Boot's static folder
+  // When building for production: 'dist' for Vercel/standalone, or Spring static if BUILD_TO_SPRING is set
   build: {
-    outDir: '../src/main/resources/static',
+    outDir: process.env.BUILD_TO_SPRING ? '../src/main/resources/static' : 'dist',
     emptyOutDir: true,
   },
 })

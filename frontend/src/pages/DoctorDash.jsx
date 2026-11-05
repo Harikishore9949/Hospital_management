@@ -20,7 +20,7 @@ import {
   apiAcceptEmergency, apiResolveEmergency, apiGetActiveEmergencies, apiGetAcceptedByMe,
   apiCreateArticle, apiUpdateArticle, apiDeleteArticle, apiGetMyArticles,
   apiGetDoctorAdherenceAlerts, apiChangePassword,
-  fmtDate, fmtTime, todayISO,
+  fmtDate, fmtTime, todayISO, getWsUrl,
 } from '../api'
 import '../components/ui.css'
 import '../components/dashboard.css'
@@ -1563,7 +1563,7 @@ function EmergencyAlertsSection() {
     let client = null
     try {
       client = new Client({
-        webSocketFactory: () => new SockJS('/ws'),
+        webSocketFactory: () => new SockJS(getWsUrl('/ws')),
         reconnectDelay: 3000,
         onConnect: () => {
           client.subscribe('/topic/emergency', (message) => {
@@ -2107,7 +2107,7 @@ export default function DoctorDash() {
     let client = null
     try {
       client = new Client({
-        webSocketFactory: () => new SockJS('/ws'),
+        webSocketFactory: () => new SockJS(getWsUrl('/ws')),
         reconnectDelay: 3000,
         onConnect: () => {
           client.subscribe('/topic/emergency', () => pollEmergency())

@@ -28,7 +28,7 @@ import {
   apiRaiseEmergency, apiCancelEmergency, apiGetMyEmergencies,
   apiGetArticles, apiLikeArticle, apiChangePassword,
   apiGetPatientProfile, apiSavePatientProfile, apiLikeDoctor,
-  fmtDate, fmtTime, fmtDateTime,
+  fmtDate, fmtTime, fmtDateTime, getWsUrl,
 } from '../api'
 import '../components/ui.css'
 import '../components/dashboard.css'
@@ -774,7 +774,7 @@ function MyApptsSection() {
   useEffect(() => {
     if (!username || !token) return
     const client = new Client({
-      webSocketFactory: () => new SockJS('http://localhost:8100/ws'),
+      webSocketFactory: () => new SockJS(getWsUrl('/ws')),
       connectHeaders: { Authorization: `Bearer ${token}` },
       reconnectDelay: 3000,
       onConnect: () => {
@@ -3104,7 +3104,7 @@ export default function PatientDash() {
     const interval = setInterval(checkActiveSessions, 4000)
 
     const client = new Client({
-      webSocketFactory: () => new SockJS('http://localhost:8100/ws'),
+      webSocketFactory: () => new SockJS(getWsUrl('/ws')),
       connectHeaders: { Authorization: `Bearer ${token}` },
       reconnectDelay: 3000,
       onConnect: () => {

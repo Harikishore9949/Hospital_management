@@ -28,7 +28,7 @@ import {
   apiGetMyDocuments, apiGetSessionDocuments,
   apiUploadDocument, apiDeleteDocument, apiDocFileUrl,
   apiIssuePrescription, apiGetPrescriptionByAppt,
-  apiGetMyLabOrders,
+  apiGetMyLabOrders, getWsUrl,
 } from '../api'
 import './VideoRoom.css'
 
@@ -942,7 +942,7 @@ export default function VideoRoom() {
   function setupStomp() {
     const token = getToken()
     const client = new Client({
-      webSocketFactory: () => new SockJS('http://localhost:8100/ws'),
+      webSocketFactory: () => new SockJS(getWsUrl('/ws')),
       connectHeaders: { Authorization: `Bearer ${token}` },
       reconnectDelay: 2000,
       onConnect: () => {

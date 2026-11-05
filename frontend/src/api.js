@@ -15,12 +15,28 @@ export const getUsername = () => _username;
 export const getRole     = () => _role;
 export const isAuthenticated = () => !!_token;
 
+// ─── Base URL helper (for Vercel -> Render backend deployment) ───────
+export const API_BASE_URL = (import.meta.env.VITE_API_BASE_URL || '').replace(/\/+$/, '');
+
+export const getApiUrl = (path) => {
+  if (!path) return API_BASE_URL || '';
+  if (path.startsWith('http://') || path.startsWith('https://')) return path;
+  const cleanPath = path.startsWith('/') ? path : `/${path}`;
+  return API_BASE_URL ? `${API_BASE_URL}${cleanPath}` : cleanPath;
+};
+
+export const getWsUrl = (path = '/ws') => {
+  if (path.startsWith('http://') || path.startsWith('https://')) return path;
+  const cleanPath = path.startsWith('/') ? path : `/${path}`;
+  return API_BASE_URL ? `${API_BASE_URL}${cleanPath}` : cleanPath;
+};
+
 // ─── Core fetch wrapper ───────────────────────────────────────
 export async function apiFetch(path, options = {}) {
   const headers = { 'Content-Type': 'application/json', ...(options.headers || {}) };
   if (_token) headers['Authorization'] = `Bearer ${_token}`;
 
-  const res = await fetch(path, { ...options, headers });
+  const res = await fetch(getApiUrl(path), { ...options, headers });
 
   const ct = res.headers.get('content-type') || '';
   const body = ct.includes('application/json') ? await res.json() : await res.text();
@@ -119,7 +135,7 @@ export const apiCheckRoom          = (roomId)        => apiFetch(`/api/session/c
 export const apiGetMyDocuments     = ()              => apiFetch('/api/docs/my');
 export const apiDeleteDocument     = (id)            => apiFetch(`/api/docs/${id}`, { method: 'DELETE' });
 export const apiGetSessionDocuments = (roomId)       => apiFetch(`/api/docs/session/${roomId}`);
-export const apiDocFileUrl         = (id)            => `/api/docs/file/${id}`;
+export const apiDocFileUrl         = (id)            => getApiUrl(`/api/docs/file/${id}`);
 
 // ─── Prescription & Medication Tracker endpoints ─────────────────────
 export const apiIssuePrescription       = (appointmentId, payload) => apiFetch(`/api/prescription/issue/${appointmentId}`, { method: 'POST', body: JSON.stringify(payload) });
@@ -171,7 +187,7 @@ export async function apiLabUploadHardcopy(orderId, file) {
   formData.append('file', file);
   const headers = {};
   if (_token) headers['Authorization'] = `Bearer ${_token}`;
-  const res = await fetch(`/api/lab/orders/${orderId}/upload-hardcopy`, {
+  const res = await fetch(getApiUrl(`/api/lab/orders/${orderId}/upload-hardcopy`), {
     method: 'POST',
     headers,
     body: formData,
@@ -207,7 +223,7 @@ export async function apiUploadDocument(file, appointmentId) {
   const headers = {};
   if (_token) headers['Authorization'] = `Bearer ${_token}`;
 
-  const res = await fetch('/api/docs/upload', {
+  const res = await fetch(getApiUrl('/api/docs/upload'), {
     method: 'POST',
     headers,
     body: formData,
