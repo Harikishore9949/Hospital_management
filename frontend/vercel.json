@@ -1,9 +1,16 @@
 {
   "rewrites": [
     {
+      "source": "/api/:path*",
+      "destination": "https://hospital-management-backend-h7t0.onrender.com/api/:path*"
+    },
+    {
+      "source": "/ws/:path*",
+      "destination": "https://hospital-management-backend-h7t0.onrender.com/ws/:path*"
+    },
+    {
       "source": "/(.*)",
       "destination": "/index.html"
     }
   ]
 }
-
