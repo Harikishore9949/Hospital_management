@@ -2114,6 +2114,7 @@ export default function DoctorDash() {
   const [view, setView] = useState('schedule')
   const [profileComplete, setProfileComplete] = useState(false)
   const [emergencyCount, setEmergencyCount] = useState(0)
+  const username = getUsername()
 
   useEffect(() => {
     apiGetMyDoctorProfile()
