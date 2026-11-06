@@ -40,4 +40,17 @@ public interface AppointmentRepository
     );
 
     List<Appointment> findByPatientOrderByRequestedAtDesc(User patient);
+
+    boolean existsByPatientAndAvailabilitySlotIdAndStatus(
+            User patient,
+            Integer availabilitySlotId,
+            AppointmentStatus status
+    );
+
+    long countByDoctorAndAvailabilitySlot_Date(
+            User doctor,
+            java.time.LocalDate date
+    );
+
+    List<Appointment> findByAvailabilitySlot_DateBefore(java.time.LocalDate cutoffDate);
 }

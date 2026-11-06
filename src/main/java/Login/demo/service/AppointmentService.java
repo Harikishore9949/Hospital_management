@@ -2,14 +2,13 @@ package Login.demo.service;
 
 import Login.demo.dto.AppointmentRequest;
 import Login.demo.entity.*;
-import Login.demo.repository.AppointmentRepository;
-import Login.demo.repository.AvailabilitySlotRepository;
-import Login.demo.repository.DoctorProfileRepository;
-import Login.demo.repository.UserRepository;
+import Login.demo.repository.*;
+import org.springframework.messaging.simp.SimpMessagingTemplate;
 import org.springframework.stereotype.Service;
 
 import java.time.LocalDateTime;
 import java.util.List;
+import java.util.Map;
 
 @Service
 public class AppointmentService {
@@ -18,17 +17,26 @@ public class AppointmentService {
     private final AvailabilitySlotRepository availabilitySlotRepository;
     private final UserRepository userRepository;
     private final DoctorProfileRepository doctorProfileRepository;
+    private final SimpMessagingTemplate messagingTemplate;
+    private final VideoSessionRepository videoSessionRepository;
+    private final MedicalDocumentRepository medicalDocumentRepository;
 
     public AppointmentService(
             AppointmentRepository appointmentRepository,
             AvailabilitySlotRepository availabilitySlotRepository,
             UserRepository userRepository,
-            DoctorProfileRepository doctorProfileRepository) {
+            DoctorProfileRepository doctorProfileRepository,
+            SimpMessagingTemplate messagingTemplate,
+            VideoSessionRepository videoSessionRepository,
+            MedicalDocumentRepository medicalDocumentRepository) {
 
         this.appointmentRepository = appointmentRepository;
         this.availabilitySlotRepository = availabilitySlotRepository;
         this.userRepository = userRepository;
         this.doctorProfileRepository = doctorProfileRepository;
+        this.messagingTemplate = messagingTemplate;
+        this.videoSessionRepository = videoSessionRepository;
+        this.medicalDocumentRepository = medicalDocumentRepository;
     }
 
     public Appointment bookAppointment(
@@ -49,6 +57,17 @@ public class AppointmentService {
                 .findById(request.getAvailabilitySlotId())
                 .orElseThrow(() -> new RuntimeException("Availability slot not found"));
 
+        // Rule: Before the actual meeting schedule start time, no one can book appointment
+        LocalDateTime slotStart = LocalDateTime.of(slot.getDate(), slot.getStartTime());
+        if (!slotStart.isAfter(LocalDateTime.now())) {
+            throw new RuntimeException("Cannot book appointment for a slot that has already started or passed.");
+        }
+
+        // Rule: Patient cannot book the same slot again if doctor previously rejected them for it
+        if (appointmentRepository.existsByPatientAndAvailabilitySlotIdAndStatus(patient, slot.getId(), AppointmentStatus.REJECTED)) {
+            throw new RuntimeException("You cannot book this slot again as your previous booking was rejected by the doctor. Please select another slot.");
+        }
+
         // Check whether the slot is still available
         if (!slot.isAvailable()) {
             throw new RuntimeException("This slot is no longer available");
@@ -61,6 +80,10 @@ public class AppointmentService {
             throw new RuntimeException("This slot has already been booked");
         }
 
+        // Calculate queue position: Starts from 1 every new day for this doctor
+        long dailyCount = appointmentRepository.countByDoctorAndAvailabilitySlot_Date(slot.getDoctor(), slot.getDate());
+        int queueToken = (int) dailyCount + 1;
+
         // Create appointment with patient details
         Appointment appointment = new Appointment();
         appointment.setDoctor(slot.getDoctor());
@@ -68,7 +91,7 @@ public class AppointmentService {
         appointment.setAvailabilitySlot(slot);
         appointment.setStatus(AppointmentStatus.PENDING);
         appointment.setPaymentStatus("UNPAID");
-        appointment.setQueuePosition(null);
+        appointment.setQueuePosition(queueToken);
         appointment.setRequestedAt(LocalDateTime.now());
         appointment.setApprovedAt(null);
         appointment.setPaymentDeadline(null);
@@ -246,6 +269,50 @@ public class AppointmentService {
         appt.setPaidAt(LocalDateTime.now());
         appt.setTransactionId(txId != null && !txId.isBlank() ? txId : "TXN-" + System.currentTimeMillis());
 
-        return appointmentRepository.save(appt);
+        Appointment saved = appointmentRepository.save(appt);
+
+        // Instantly notify doctor dashboard via WebSocket
+        if (messagingTemplate != null && saved.getDoctor() != null) {
+            try {
+                Map<String, Object> payload = Map.of(
+                        "type", "PAYMENT_RECEIVED",
+                        "appointmentId", saved.getId(),
+                        "patientName", saved.getPatientFullName() != null ? saved.getPatientFullName() : (saved.getPatient() != null ? saved.getPatient().getUsername() : "Patient"),
+                        "amount", saved.getConsultationFee() != null ? saved.getConsultationFee() : 500.0,
+                        "queuePosition", saved.getQueuePosition() != null ? saved.getQueuePosition() : 1,
+                        "timestamp", LocalDateTime.now().toString()
+                );
+                messagingTemplate.convertAndSend("/topic/doctor-notifications/" + saved.getDoctor().getUsername(), payload);
+                messagingTemplate.convertAndSend("/topic/appointments", payload);
+            } catch (Exception ignored) {}
+        }
+
+        return saved;
+    }
+
+    /**
+     * Delete appointments whose schedule has completed and is more than 1 day old.
+     * Runs daily at 2:00 AM, and also runs during cleanup cycles.
+     */
+    @org.springframework.scheduling.annotation.Scheduled(cron = "0 0 2 * * ?")
+    @org.springframework.transaction.annotation.Transactional
+    public void cleanupOldAppointments() {
+        try {
+            java.time.LocalDate cutoffDate = java.time.LocalDate.now().minusDays(1);
+            List<Appointment> oldAppointments = appointmentRepository.findByAvailabilitySlot_DateBefore(cutoffDate);
+            for (Appointment appt : oldAppointments) {
+                try {
+                    videoSessionRepository.findByAppointment_Id(appt.getId())
+                            .ifPresent(videoSessionRepository::delete);
+                    medicalDocumentRepository.findByAppointment(appt).forEach(doc -> {
+                        doc.setAppointment(null);
+                        medicalDocumentRepository.save(doc);
+                    });
+                    appointmentRepository.delete(appt);
+                } catch (Exception e) {
+                    // ignore individual failure and proceed
+                }
+            }
+        } catch (Exception ignored) {}
     }
 }

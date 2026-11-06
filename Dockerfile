@@ -27,3 +27,4 @@ ENV PORT=8089
 EXPOSE 8089
 
 ENTRYPOINT ["sh", "-c", "java -Djava.security.egd=file:/dev/./urandom -jar app.jar --server.port=${PORT:-8089}"]
+

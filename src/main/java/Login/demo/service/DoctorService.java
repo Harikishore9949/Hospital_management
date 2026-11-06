@@ -100,6 +100,22 @@ public class DoctorService {
             throw new RuntimeException("Only doctors can create availability");
         }
 
+        if (request.getDate() == null || request.getStartTime() == null || request.getEndTime() == null) {
+            throw new RuntimeException("Date, start time, and end time are required");
+        }
+
+        if (!request.getStartTime().isBefore(request.getEndTime())) {
+            throw new RuntimeException("Start time must be strictly before end time");
+        }
+
+        if (request.getDate().isBefore(LocalDate.now())) {
+            throw new RuntimeException("Cannot create slot for a past date");
+        }
+
+        if (request.getDate().isEqual(LocalDate.now()) && request.getStartTime().isBefore(LocalTime.now())) {
+            throw new RuntimeException("Cannot create slot for a past time today");
+        }
+
         AvailabilitySlot slot = new AvailabilitySlot();
         slot.setDoctor(doctor);
         slot.setDate(request.getDate());
@@ -168,9 +184,34 @@ public class DoctorService {
         }
 
         appt.setStatus(AppointmentStatus.ACCEPTED);
-        appt.setApprovedAt(java.time.LocalDateTime.now());
-        // Set 6 hours payment deadline from now
-        appt.setPaymentDeadline(java.time.LocalDateTime.now().plusHours(6));
+        java.time.LocalDateTime now = java.time.LocalDateTime.now();
+        appt.setApprovedAt(now);
+
+        // Dynamic payment deadline logic:
+        // <= 30 mins until slot -> 5 min payment window (capped at slot start)
+        // < 6 hours until slot -> 30 min payment window (capped at slot start)
+        // >= 6 hours until slot -> 6 hour payment window (capped at slot start)
+        AvailabilitySlot slot = appt.getAvailabilitySlot();
+        java.time.LocalDateTime slotStart = (slot != null && slot.getDate() != null && slot.getStartTime() != null)
+                ? java.time.LocalDateTime.of(slot.getDate(), slot.getStartTime())
+                : now.plusHours(6);
+
+        long minutesUntilSlot = java.time.Duration.between(now, slotStart).toMinutes();
+
+        java.time.LocalDateTime deadline;
+        if (minutesUntilSlot <= 30) {
+            deadline = now.plusMinutes(5);
+        } else if (minutesUntilSlot < 360) {
+            deadline = now.plusMinutes(30);
+        } else {
+            deadline = now.plusHours(6);
+        }
+
+        if (deadline.isAfter(slotStart)) {
+            deadline = slotStart;
+        }
+
+        appt.setPaymentDeadline(deadline);
 
         return appointmentRepository.save(appt);
     }

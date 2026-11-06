@@ -31,6 +31,31 @@ export const getWsUrl = (path = '/ws') => {
   return API_BASE_URL ? `${API_BASE_URL}${cleanPath}` : cleanPath;
 };
 
+// Safe Cross-Platform Web Notification (guards against Android Chrome Illegal constructor exception)
+export function safeShowNotification(title, options = {}) {
+  try {
+    if (typeof window === 'undefined' || !('Notification' in window)) return;
+    if (Notification.permission !== 'granted') return;
+
+    if ('serviceWorker' in navigator && navigator.serviceWorker.controller) {
+      navigator.serviceWorker.ready
+        .then(reg => reg.showNotification(title, { icon: '/favicon.ico', ...options }))
+        .catch(() => {
+          try { new Notification(title, { icon: '/favicon.ico', ...options }); } catch (e) {}
+        });
+    } else {
+      try {
+        new Notification(title, { icon: '/favicon.ico', ...options });
+      } catch (e) {
+        // Android Chrome throws Illegal constructor on window.Notification
+        console.warn('Native notification unsupported in this context:', e);
+      }
+    }
+  } catch (err) {
+    console.warn('safeShowNotification error:', err);
+  }
+}
+
 // ─── Core fetch wrapper ───────────────────────────────────────
 export async function apiFetch(path, options = {}) {
   const headers = { 'Content-Type': 'application/json', ...(options.headers || {}) };

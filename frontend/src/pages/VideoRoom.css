@@ -151,6 +151,88 @@
   margin: 0 auto;
 }
 
+/* Google Meet Full Stage Container with PiP Self View */
+.meet-stage-container {
+  position: relative;
+  width: 100%;
+  height: 100%;
+  max-width: 1200px;
+  max-height: calc(100vh - 165px);
+  margin: 0 auto;
+  display: flex;
+  align-items: center;
+  justify-content: center;
+}
+
+.meet-main-tile {
+  width: 100%;
+  height: 100%;
+  background: #202124;
+  border-radius: 16px;
+  overflow: hidden;
+  position: relative;
+  display: flex;
+  align-items: center;
+  justify-content: center;
+  box-shadow: 0 8px 32px rgba(0, 0, 0, 0.45);
+}
+
+.meet-main-tile video {
+  width: 100%;
+  height: 100%;
+  object-fit: cover;
+  border-radius: 16px;
+}
+
+.meet-main-tile.presenting video {
+  object-fit: contain !important;
+  background: #000;
+}
+
+/* Picture-in-Picture Floating Window */
+.meet-pip-tile {
+  position: absolute;
+  bottom: 24px;
+  right: 24px;
+  width: min(220px, 26vw);
+  height: min(140px, 18vh);
+  background: #3c4043;
+  border-radius: 12px;
+  overflow: hidden;
+  box-shadow: 0 10px 30px rgba(0, 0, 0, 0.6);
+  border: 2px solid rgba(255, 255, 255, 0.25);
+  z-index: 100;
+  transition: transform 0.2s ease, box-shadow 0.2s ease;
+  display: flex;
+  align-items: center;
+  justify-content: center;
+}
+
+.meet-pip-tile:hover {
+  transform: scale(1.04);
+  box-shadow: 0 14px 40px rgba(0, 0, 0, 0.7);
+  border-color: #3b82f6;
+}
+
+.meet-pip-tile video {
+  width: 100%;
+  height: 100%;
+  object-fit: cover;
+}
+
+@media (max-width: 768px) {
+  .meet-stage-container {
+    max-height: calc(100vh - 175px);
+  }
+  .meet-pip-tile {
+    bottom: 85px;
+    right: 14px;
+    width: 110px;
+    height: 75px;
+    border-radius: 10px;
+  }
+}
+
 .meet-grid.one-peer .meet-tile {
   width: min(840px, 92vw);
   height: min(520px, 68vh);

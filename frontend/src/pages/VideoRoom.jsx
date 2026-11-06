@@ -21,6 +21,7 @@ import {
   Monitor, MonitorOff, FileText, X, Upload,
   Trash2, Eye, AlertTriangle, Users, MoreVertical,
   Hand, Settings, Check, Copy, ClipboardPlus, FlaskConical,
+  RefreshCw,
 } from 'lucide-react'
 import {
   getToken, getUsername, getRole,
@@ -28,7 +29,7 @@ import {
   apiGetMyDocuments, apiGetSessionDocuments,
   apiUploadDocument, apiDeleteDocument, apiDocFileUrl,
   apiIssuePrescription, apiGetPrescriptionByAppt,
-  apiGetMyLabOrders, getWsUrl,
+  apiGetMyLabOrders, getWsUrl, safeShowNotification,
 } from '../api'
 import './VideoRoom.css'
 
@@ -745,12 +746,15 @@ export default function VideoRoom() {
   const [initError, setInitError] = useState(null)
 
   // Media
-  const [micOn, setMicOn]     = useState(true)
-  const [camOn, setCamOn]     = useState(true)
-  const [screenOn, setScreenOn] = useState(false)
+  const [micOn, setMicOn]         = useState(true)
+  const [camOn, setCamOn]         = useState(true)
+  const [screenOn, setScreenOn]   = useState(false)
   const [peerConnected, setPeerConnected] = useState(false)
   const [peerCamOn, setPeerCamOn] = useState(true)
   const [peerMicOn, setPeerMicOn] = useState(true)
+  const [facingMode, setFacingMode] = useState('user') // 'user' or 'environment'
+  const [swappedView, setSwappedView] = useState(false)
+  const [isPeerSharing, setIsPeerSharing] = useState(false)
 
   // UI / Side Panel / Modals
   const [panelOpen, setPanelOpen] = useState(false)
@@ -770,21 +774,20 @@ export default function VideoRoom() {
   const timer = useTimer(!!sessionInfo && !sessionEnded)
 
   // Refs
-  const localVideoRef  = useRef(null)
-  const remoteVideoRef = useRef(null)
-  const localStream    = useRef(null)
-  const screenStream   = useRef(null)
-  const peerConn       = useRef(null)
-  const stompClient    = useRef(null)
-  const isOfferSide    = useRef(false)
+  const localVideoRef       = useRef(null)
+  const remoteVideoRef      = useRef(null)
+  const localStream         = useRef(null)
+  const screenStream        = useRef(null)
+  const peerConn            = useRef(null)
+  const stompClient         = useRef(null)
+  const isOfferSide         = useRef(false)
+  const pendingCandidates   = useRef([])
 
   function pushNotif(icon, title, msg) {
     const id = ++notifCounter.current
     setNotifs(prev => [...prev, { id, icon, title, msg, exiting: false }])
     setTimeout(() => dismissNotif(id), 5000)
-    if (typeof Notification !== 'undefined' && Notification.permission === 'granted') {
-      new Notification(title, { body: msg, icon: '/favicon.ico' })
-    }
+    safeShowNotification(title, { body: msg, icon: '/favicon.ico' })
   }
 
   function dismissNotif(id) {
@@ -913,7 +916,16 @@ export default function VideoRoom() {
 
     pc.ontrack = event => {
       if (remoteVideoRef.current) {
-        remoteVideoRef.current.srcObject = event.streams[0]
+        if (event.streams && event.streams[0]) {
+          remoteVideoRef.current.srcObject = event.streams[0]
+        } else {
+          if (!remoteVideoRef.current.srcObject) {
+            remoteVideoRef.current.srcObject = new MediaStream()
+          }
+          remoteVideoRef.current.srcObject.addTrack(event.track)
+        }
+        remoteVideoRef.current.muted = false
+        remoteVideoRef.current.volume = 1.0
         remoteVideoRef.current.play().catch(() => {})
         setPeerConnected(true)
         setParticipantCount(2)
@@ -1006,8 +1018,11 @@ export default function VideoRoom() {
     } else if (msg.type === 'hand_raised') {
       pushNotif('✋', 'Hand raised', `${msg.name} raised their hand.`)
     } else if (msg.type === 'screen_share_started') {
+      setIsPeerSharing(true)
+      setPeerCamOn(true)
       pushNotif('🖥️', 'Screen sharing', `${msg.name} started presenting.`)
     } else if (msg.type === 'screen_share_stopped') {
+      setIsPeerSharing(false)
       pushNotif('🖥️', 'Presentation stopped', `${msg.name} stopped presenting.`)
     } else if (msg.type === 'cam_off') {
       setPeerCamOn(false)
@@ -1032,18 +1047,79 @@ export default function VideoRoom() {
     try {
       if (msg.type === 'offer') {
         await pc.setRemoteDescription(new RTCSessionDescription(msg))
+        while (pendingCandidates.current.length > 0) {
+          const cand = pendingCandidates.current.shift()
+          await pc.addIceCandidate(new RTCIceCandidate(cand)).catch(() => {})
+        }
         const answer = await pc.createAnswer()
         await pc.setLocalDescription(answer)
         sendSignal({ type: 'answer', sdp: answer.sdp, from: username })
       } else if (msg.type === 'answer') {
         if (pc.signalingState !== 'have-local-offer') return
         await pc.setRemoteDescription(new RTCSessionDescription({ type: 'answer', sdp: msg.sdp }))
+        while (pendingCandidates.current.length > 0) {
+          const cand = pendingCandidates.current.shift()
+          await pc.addIceCandidate(new RTCIceCandidate(cand)).catch(() => {})
+        }
       } else if (msg.type === 'candidate') {
-        if (msg.candidate) await pc.addIceCandidate(new RTCIceCandidate(msg.candidate)).catch(() => {})
+        if (msg.candidate) {
+          if (pc.remoteDescription && pc.remoteDescription.type) {
+            await pc.addIceCandidate(new RTCIceCandidate(msg.candidate)).catch(() => {})
+          } else {
+            pendingCandidates.current.push(msg.candidate)
+          }
+        }
       } else if (msg.type === 'end') {
         handleRemoteEnd()
       }
     } catch { /* ignore */ }
+  }
+
+  async function flipCamera() {
+    const nextFacing = facingMode === 'user' ? 'environment' : 'user'
+    try {
+      const oldTrack = localStream.current?.getVideoTracks()[0]
+      let newStream
+      try {
+        newStream = await navigator.mediaDevices.getUserMedia({
+          video: { facingMode: { exact: nextFacing } },
+          audio: false
+        })
+      } catch {
+        newStream = await navigator.mediaDevices.getUserMedia({
+          video: { facingMode: nextFacing },
+          audio: false
+        })
+      }
+
+      const newTrack = newStream.getVideoTracks()[0]
+      if (!newTrack) throw new Error('No track on alternate camera')
+
+      if (oldTrack) oldTrack.stop()
+
+      if (peerConn.current) {
+        const sender = peerConn.current.getSenders().find(s => s.track && s.track.kind === 'video')
+        if (sender) {
+          await sender.replaceTrack(newTrack)
+        }
+      }
+
+      if (localStream.current) {
+        if (oldTrack) localStream.current.removeTrack(oldTrack)
+        localStream.current.addTrack(newTrack)
+      }
+
+      if (localVideoRef.current) {
+        localVideoRef.current.srcObject = localStream.current
+      }
+
+      setFacingMode(nextFacing)
+      setCamOn(true)
+      pushNotif('📷', 'Camera Flipped', `Switched to ${nextFacing === 'user' ? 'front' : 'back'} camera.`)
+    } catch (err) {
+      console.warn('flipCamera error:', err)
+      pushNotif('⚠️', 'Camera Flip', 'Back camera not accessible on this device.')
+    }
   }
 
   async function createAndSendOffer() {
@@ -1262,59 +1338,92 @@ export default function VideoRoom() {
       <div className="meet-body">
         <div className={`meet-stage ${panelOpen ? 'with-panel' : ''}`}>
 
-          {/* Grid Layout */}
-          <div className={`meet-grid ${peerConnected ? 'two-peers' : 'one-peer'}`}>
+          {/* Google Meet Stage View with Picture-in-Picture */}
+          <div className="meet-stage-container">
 
-            {/* Remote Peer Tile */}
+            {/* Main Stage Tile */}
+            <div className={`meet-tile meet-main-tile ${isPeerSharing || screenOn ? 'presenting' : ''}`}>
+              {peerConnected ? (
+                <>
+                  <video
+                    ref={remoteVideoRef}
+                    autoPlay
+                    playsInline
+                    style={{
+                      width: '100%',
+                      height: '100%',
+                      objectFit: isPeerSharing ? 'contain' : 'cover',
+                      display: peerCamOn ? 'block' : 'none'
+                    }}
+                  />
+                  {!peerCamOn && (
+                    <div className="meet-avatar-placeholder">
+                      <div className="avatar-circle">
+                        {role === 'DOCTOR' ? '🧑‍🤝‍🧑' : '👨‍⚕️'}
+                      </div>
+                      <span className="avatar-name">
+                        {role === 'DOCTOR' ? sessionInfo?.patientName : `Dr. ${sessionInfo?.doctorName}`}
+                      </span>
+                    </div>
+                  )}
+                  <div className="meet-tile-name">
+                    {!peerMicOn && <MicOff size={13} className="mic-off-icon" />}
+                    <span>{role === 'DOCTOR' ? sessionInfo?.patientName : `Dr. ${sessionInfo?.doctorName}`}</span>
+                    {isPeerSharing && <span className="meet-presenting-tag" style={{ marginLeft: 8, background: '#2563eb', padding: '2px 8px', borderRadius: 4, fontSize: '0.72rem' }}>🖥️ Presenting</span>}
+                  </div>
+                </>
+              ) : (
+                <>
+                  <video
+                    ref={localVideoRef}
+                    autoPlay
+                    playsInline
+                    muted
+                    style={{ width: '100%', height: '100%', objectFit: 'cover', display: camOn ? 'block' : 'none' }}
+                  />
+                  {!camOn && (
+                    <div className="meet-avatar-placeholder">
+                      <div className="avatar-circle">
+                        {role === 'DOCTOR' ? '👨‍⚕️' : '🧑‍🤝‍🧑'}
+                      </div>
+                      <span className="avatar-name">You</span>
+                    </div>
+                  )}
+                  <div className="meet-tile-name">
+                    {!micOn && <MicOff size={13} className="mic-off-icon" />}
+                    <span>You {handRaised ? '✋' : ''}</span>
+                  </div>
+                  <div style={{ position: 'absolute', top: 20, background: 'rgba(32,33,36,0.85)', backdropFilter: 'blur(6px)', padding: '8px 16px', borderRadius: 20, color: '#e8eaed', fontSize: '0.85rem', display: 'flex', alignItems: 'center', gap: 8, border: '1px solid rgba(255,255,255,0.1)' }}>
+                    <span className="meet-dot-green" />
+                    <span>Waiting for {role === 'DOCTOR' ? (sessionInfo?.patientName || 'patient') : (`Dr. ${sessionInfo?.doctorName || 'doctor'}`)} to join…</span>
+                  </div>
+                </>
+              )}
+            </div>
+
+            {/* Floating Picture-in-Picture Tile (Self-View in Bottom-Right Corner) */}
             {peerConnected && (
-              <div className="meet-tile remote-tile">
+              <div className="meet-pip-tile" title="Your camera view">
                 <video
-                  ref={remoteVideoRef}
+                  ref={localVideoRef}
                   autoPlay
                   playsInline
-                  style={{ width: '100%', height: '100%', objectFit: 'cover', display: peerCamOn ? 'block' : 'none' }}
+                  muted
+                  style={{ width: '100%', height: '100%', objectFit: 'cover', display: camOn ? 'block' : 'none' }}
                 />
-                {!peerCamOn && (
-                  <div className="meet-avatar-placeholder">
-                    <div className="avatar-circle">
-                      {role === 'DOCTOR' ? '🧑‍🤝‍🧑' : '👨‍⚕️'}
+                {!camOn && (
+                  <div className="meet-avatar-placeholder" style={{ transform: 'scale(0.65)' }}>
+                    <div className="avatar-circle" style={{ width: 44, height: 44, fontSize: '1.2rem' }}>
+                      {role === 'DOCTOR' ? '👨‍⚕️' : '🧑‍🤝‍🧑'}
                     </div>
-                    <span className="avatar-name">
-                      {role === 'DOCTOR' ? sessionInfo?.patientName : `Dr. ${sessionInfo?.doctorName}`}
-                    </span>
                   </div>
                 )}
-
-                <div className="meet-tile-name">
-                  {!peerMicOn && <MicOff size={13} className="mic-off-icon" />}
-                  <span>{role === 'DOCTOR' ? sessionInfo?.patientName : `Dr. ${sessionInfo?.doctorName}`}</span>
+                <div className="meet-tile-name" style={{ fontSize: '0.7rem', padding: '2px 8px', bottom: 6, left: 6 }}>
+                  {!micOn && <MicOff size={11} className="mic-off-icon" />}
+                  <span>You {handRaised ? '✋' : ''}</span>
                 </div>
               </div>
             )}
-
-            {/* Local Video Tile */}
-            <div className={`meet-tile local-tile ${!peerConnected ? 'solo' : ''}`}>
-              <video
-                ref={localVideoRef}
-                autoPlay
-                playsInline
-                muted
-                style={{ width: '100%', height: '100%', objectFit: 'cover', display: camOn ? 'block' : 'none' }}
-              />
-              {!camOn && (
-                <div className="meet-avatar-placeholder">
-                  <div className="avatar-circle">
-                    {role === 'DOCTOR' ? '👨‍⚕️' : '🧑‍🤝‍🧑'}
-                  </div>
-                  <span className="avatar-name">You</span>
-                </div>
-              )}
-
-              <div className="meet-tile-name">
-                {!micOn && <MicOff size={13} className="mic-off-icon" />}
-                <span>You {handRaised ? '✋' : ''}</span>
-              </div>
-            </div>
 
           </div>
 
@@ -1336,6 +1445,14 @@ export default function VideoRoom() {
                 title={camOn ? 'Turn off camera' : 'Turn on camera'}
               >
                 {camOn ? <Video size={20} /> : <VideoOff size={20} />}
+              </button>
+
+              <button
+                className="meet-ctrl-btn"
+                onClick={flipCamera}
+                title={`Switch camera (Currently ${facingMode === 'user' ? 'Front' : 'Back'})`}
+              >
+                <RefreshCw size={20} />
               </button>
 
               {/* Doctor Prescription Action Button in Capsule */}

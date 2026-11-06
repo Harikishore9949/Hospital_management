@@ -28,7 +28,7 @@ import {
   apiRaiseEmergency, apiCancelEmergency, apiGetMyEmergencies,
   apiGetArticles, apiLikeArticle, apiChangePassword,
   apiGetPatientProfile, apiSavePatientProfile, apiLikeDoctor,
-  fmtDate, fmtTime, fmtDateTime, getWsUrl,
+  fmtDate, fmtTime, fmtDateTime, getWsUrl, safeShowNotification,
 } from '../api'
 import '../components/ui.css'
 import '../components/dashboard.css'
@@ -76,9 +76,19 @@ function DoctorDetailPanel({ doctorProfile, onBack }) {
 
     apiGetDoctorSlots(doctor.id)
       .then(data => {
-        const available = (data || []).filter(s => s.available !== false)
+        const now = new Date()
+        const available = (data || []).filter(s => {
+          if (s.available === false) return false
+          if (s.date && s.startTime) {
+            const [y, m, d] = Array.isArray(s.date) ? s.date : String(s.date).split('-').map(Number)
+            const [hh, mm] = String(s.startTime).split(':').map(Number)
+            const slotStart = new Date(y, (m || 1) - 1, d, hh || 0, mm || 0, 0)
+            if (slotStart <= now) return false
+          }
+          return true
+        })
         setSlots(available)
-        if (available.length === 0) setSlotAlert({ type: 'info', msg: 'No available slots at the moment.' })
+        if (available.length === 0) setSlotAlert({ type: 'info', msg: 'No upcoming available slots for this doctor.' })
       })
       .catch(err => setSlotAlert({ type: 'error', msg: err.message || 'Failed to load slots.' }))
       .finally(() => setSlotsLoading(false))
@@ -787,22 +797,16 @@ function MyApptsSection() {
                 roomId: data.roomId,
                 appointmentId: data.appointmentId,
               })
-              if (typeof Notification !== 'undefined' && Notification.permission === 'granted') {
-                new Notification('👨‍⚕️ Session Started!', {
-                  body: `Dr. ${data.doctorName} has started your consultation session and is waiting for you.`,
-                  icon: '/favicon.ico',
-                })
-              }
+              safeShowNotification('👨‍⚕️ Session Started!', {
+                body: `Dr. ${data.doctorName} has started your consultation session and is waiting for you.`,
+              })
             }
             if (data.type === 'PRESCRIPTION_ISSUED' || data.type === 'prescription_issued') {
               setAlert({ type: 'success', msg: `💊 New prescription received from Dr. ${data.doctorName || ''}!` })
               window.dispatchEvent(new CustomEvent('prescription_updated'))
-              if (typeof Notification !== 'undefined' && Notification.permission === 'granted') {
-                new Notification('💊 Prescription Received', {
-                  body: `Dr. ${data.doctorName || 'Doctor'} issued a new prescription for you.`,
-                  icon: '/favicon.ico',
-                })
-              }
+              safeShowNotification('💊 Prescription Received', {
+                body: `Dr. ${data.doctorName || 'Doctor'} issued a new prescription for you.`,
+              })
             }
           } catch { /* ignore parse error */ }
         }
@@ -3117,12 +3121,9 @@ export default function PatientDash() {
                 roomId: data.roomId,
                 appointmentId: data.appointmentId,
               })
-              if (typeof Notification !== 'undefined' && Notification.permission === 'granted') {
-                new Notification('👨‍⚕️ Session Started!', {
-                  body: `Dr. ${data.doctorName} has started your consultation session and is waiting for you.`,
-                  icon: '/favicon.ico',
-                })
-              }
+              safeShowNotification('👨‍⚕️ Session Started!', {
+                body: `Dr. ${data.doctorName} has started your consultation session and is waiting for you.`,
+              })
             }
             if (data.type === 'SESSION_ENDED') {
               setActiveSessionAlert(null)

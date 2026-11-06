@@ -63,8 +63,11 @@ function ScheduleSection({ profileComplete, onGoToProfile }) {
     if (!form.date || !form.startTime || !form.endTime) {
       setAlert({ type: 'warning', msg: 'Please fill in all slot fields.' }); return
     }
+    if (form.date < todayISO()) {
+      setAlert({ type: 'warning', msg: 'Cannot add slot for a past date.' }); return
+    }
     if (form.startTime >= form.endTime) {
-      setAlert({ type: 'warning', msg: 'End time must be after start time.' }); return
+      setAlert({ type: 'warning', msg: 'Start time must be strictly before end time.' }); return
     }
     setLoading(true)
     try {
@@ -168,7 +171,7 @@ function ScheduleSection({ profileComplete, onGoToProfile }) {
               </div>
               <div className="form-group" style={{ marginBottom: 0 }}>
                 <label className="form-label">End Time</label>
-                <input id="slot-end" className="form-input" type="time"
+                <input id="slot-end" className="form-input" type="time" min={form.startTime || undefined}
                   value={form.endTime} onChange={e => setForm(f => ({ ...f, endTime: e.target.value }))} required />
               </div>
             </div>
@@ -732,8 +735,8 @@ function AppointmentsSection() {
   const [prescriptionAppt, setPrescriptionAppt] = useState(null)  // appointment for open modal
   const [cancellingAppt, setCancellingAppt] = useState(null)      // appointment for cancel & refund modal
 
-  const load = useCallback(async () => {
-    setLoading(true)
+  const load = useCallback(async (showSpinner = true) => {
+    if (showSpinner) setLoading(true)
     setAlert(null)
     try {
       const [data, alertsData] = await Promise.all([
@@ -754,29 +757,45 @@ function AppointmentsSection() {
       })
       setAppts(active)
     } catch (err) {
-      setAlert({ type: 'error', msg: err.message || 'Failed to load appointments.' })
-    } finally { setLoading(false) }
+      if (showSpinner) setAlert({ type: 'error', msg: err.message || 'Failed to load appointments.' })
+    } finally {
+      if (showSpinner) setLoading(false)
+    }
   }, [])
 
-  useEffect(() => { load() }, [load])
+  // Auto-refresh every 2.5 seconds + WebSocket instant trigger
+  useEffect(() => {
+    load(true)
+    const iv = setInterval(() => load(false), 2500)
+    const onUpdate = () => load(false)
+    window.addEventListener('doctor_appt_updated', onUpdate)
+    return () => {
+      clearInterval(iv)
+      window.removeEventListener('doctor_appt_updated', onUpdate)
+    }
+  }, [load])
 
   async function handleAccept(id) {
+    const target = appts.find(a => a.id === id)
+    const patientName = target?.patientFullName || target?.patient?.username || 'Patient'
     setActionId(id)
     try {
       const updated = await apiAcceptAppointment(id)
       setAppts(prev => prev.map(a => a.id === id ? updated : a))
-      setAlert({ type: 'success', msg: `Appointment ID: ${id} accepted! The patient now has 6 hours to complete payment.` })
+      setAlert({ type: 'info', msg: `Appointment #${id} for ${patientName} accepted.` })
     } catch (err) {
       setAlert({ type: 'error', msg: err.message || 'Failed to accept appointment.' })
     } finally { setActionId(null) }
   }
 
   async function handleReject(id) {
+    const target = appts.find(a => a.id === id)
+    const patientName = target?.patientFullName || target?.patient?.username || 'Patient'
     setActionId(id)
     try {
       await apiRejectAppointment(id)
       setAppts(prev => prev.filter(a => a.id !== id))
-      setAlert({ type: 'success', msg: `Appointment ID: ${id} rejected without refund (patient had not paid). Slot is freed.` })
+      setAlert({ type: 'info', msg: `Appointment #${id} for ${patientName} rejected.` })
     } catch (err) {
       setAlert({ type: 'error', msg: err.message || 'Failed to reject appointment.' })
     } finally { setActionId(null) }
@@ -856,13 +875,13 @@ function AppointmentsSection() {
         <div className="tbl-wrap">
           <table className="tbl">
             <thead><tr>
-              <th>ID</th><th>Patient</th><th>Full Name</th><th>Age</th><th>Phone</th><th>Sex</th><th>Health Issue</th><th>Date</th><th>Slot</th><th>Payment / Status</th><th>Actions</th>
+              <th>Queue #</th><th>ID</th><th>Patient</th><th>Full Name</th><th>Age</th><th>Phone</th><th>Sex</th><th>Health Issue</th><th>Date</th><th>Slot</th><th>Payment / Status</th><th>Actions</th>
             </tr></thead>
             <tbody>
               {loading
-                ? <tr><td colSpan={11}><div className="page-spinner"><span className="spinner" /> Loading…</div></td></tr>
+                ? <tr><td colSpan={12}><div className="page-spinner"><span className="spinner" /> Loading…</div></td></tr>
                 : appts.length === 0
-                  ? <tr><td colSpan={11}><div className="empty-state">
+                  ? <tr><td colSpan={12}><div className="empty-state">
                       <div className="empty-icon">🎉</div>
                       <div className="empty-title">No appointment requests yet</div>
                       <div className="empty-text">Patients who book your slots will appear here.</div>
@@ -879,6 +898,11 @@ function AppointmentsSection() {
 
                       return (
                         <tr key={a.id}>
+                          <td>
+                            <span className="badge badge-primary" style={{ fontWeight: 800, fontSize: '0.78rem' }}>
+                              #{a.queuePosition || a.id}
+                            </span>
+                          </td>
                           <td><strong>{a.id}</strong></td>
                           <td>{a.patient?.username || '—'}</td>
                           <td>{a.patientFullName || '—'}</td>
@@ -2111,6 +2135,12 @@ export default function DoctorDash() {
         reconnectDelay: 3000,
         onConnect: () => {
           client.subscribe('/topic/emergency', () => pollEmergency())
+          client.subscribe(`/topic/doctor-notifications/${username}`, () => {
+            window.dispatchEvent(new CustomEvent('doctor_appt_updated'))
+          })
+          client.subscribe('/topic/appointments', () => {
+            window.dispatchEvent(new CustomEvent('doctor_appt_updated'))
+          })
         },
       })
       client.activate()
